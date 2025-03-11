@@ -13,11 +13,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface EventFormProps {
   event?: Event;
@@ -25,10 +21,24 @@ interface EventFormProps {
   isLoading?: boolean;
 }
 
+type EventStatus = "Not Started" | "In Progress" | "Completed" | "Cancelled";
+
+interface FormData {
+  title: string;
+  description: string;
+  location: string;
+  startDate: Date;
+  endDate: Date;
+  startTime: string;
+  endTime: string;
+  status: EventStatus;
+  attendees: string;
+}
+
 export default function EventForm({ event, onSubmit, isLoading = false }: EventFormProps) {
   const navigate = useNavigate();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     location: "",
@@ -89,6 +99,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
     onSubmit({
       ...formData,
       attendees: parseInt(formData.attendees),
+      status: formData.status as EventStatus,
     });
   };
 

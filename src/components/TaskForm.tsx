@@ -24,8 +24,16 @@ interface TaskFormProps {
   isLoading?: boolean;
 }
 
+type TaskPriority = "Low" | "Medium" | "High";
+
+interface FormData {
+  title: string;
+  description: string;
+  priority: TaskPriority;
+}
+
 export default function TaskForm({ open, onOpenChange, task, onSubmit, isLoading = false }: TaskFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     priority: "Medium",
@@ -54,7 +62,7 @@ export default function TaskForm({ open, onOpenChange, task, onSubmit, isLoading
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectChange = (value: string) => {
+  const handleSelectChange = (value: TaskPriority) => {
     setFormData((prev) => ({ ...prev, priority: value }));
   };
 
