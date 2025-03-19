@@ -1,15 +1,18 @@
 
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { toast } from "sonner";
+import { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface User {
   id: string;
-  username: string;
-  email: string;
+  username: string | null;
+  email: string | null;
+  avatar_url?: string | null;
 }
 
 export interface AuthState {
-  token: string | null;
+  session: Session | null;
   isAuthenticated: boolean;
   user: User | null;
   loading: boolean;
@@ -19,13 +22,11 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
   register: (username: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
 const initialState: AuthState = {
-  token: localStorage.getItem('token'),
+  session: null,
   isAuthenticated: false,
   user: null,
   loading: true,
@@ -37,146 +38,161 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>(initialState);
 
-  // Load user on first render
+  // Load user on first render and set up listener
   useEffect(() => {
-    const loadUser = async () => {
-      if (state.token) {
-        try {
-          const response = await fetch(`${API_URL}/auth/user`, {
-            headers: {
-              'x-auth-token': state.token
-            }
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
-            setState(prev => ({
-              ...prev,
-              isAuthenticated: true,
-              loading: false,
-              user: userData
-            }));
-          } else {
-            localStorage.removeItem('token');
-            setState(prev => ({
-              ...prev,
-              token: null,
-              isAuthenticated: false,
-              loading: false,
-              user: null
-            }));
-          }
-        } catch (error) {
-          console.error('Error loading user:', error);
-          localStorage.removeItem('token');
-          setState(prev => ({
-            ...prev,
-            token: null,
-            isAuthenticated: false,
-            loading: false,
-            user: null
-          }));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setState(prev => ({
+          ...prev,
+          session,
+          isAuthenticated: !!session,
+          user: session ? {
+            id: session.user.id,
+            username: session.user.user_metadata.username || null,
+            email: session.user.email,
+            avatar_url: session.user.user_metadata.avatar_url || null
+          } : null,
+          loading: false
+        }));
+      }
+    );
+
+    // Initial session check
+    const initializeAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+      }
+
+      if (session) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
         }
+
+        setState(prev => ({
+          ...prev,
+          session,
+          isAuthenticated: true,
+          user: {
+            id: session.user.id,
+            username: profile?.username || session.user.user_metadata.username || null,
+            email: session.user.email,
+            avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null
+          },
+          loading: false
+        }));
       } else {
         setState(prev => ({ ...prev, loading: false }));
       }
     };
 
-    loadUser();
-  }, [state.token]);
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   // Register user
   const register = async (username: string, email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, email, password })
+      setState(prev => ({ ...prev, loading: true, error: null }));
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username
+          }
+        }
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
+      if (error) {
         setState(prev => ({
           ...prev,
-          token: data.token,
-          isAuthenticated: true,
-          loading: false,
-          user: data.user,
-          error: null
+          error: error.message,
+          loading: false
         }));
-        toast.success('Registration successful');
-      } else {
-        setState(prev => ({
-          ...prev,
-          error: data.message
-        }));
-        toast.error(data.message || 'Registration failed');
+        toast.error(error.message || 'Registration failed');
+        return;
       }
+
+      if (data.user) {
+        toast.success('Registration successful. Please verify your email.');
+      }
+      
     } catch (error) {
       console.error('Registration error:', error);
       setState(prev => ({
         ...prev,
-        error: 'Server error'
+        error: 'Server error',
+        loading: false
       }));
       toast.error('Server error during registration');
+    } finally {
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
   // Login user
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
+      setState(prev => ({ ...prev, loading: true, error: null }));
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
+      if (error) {
         setState(prev => ({
           ...prev,
-          token: data.token,
-          isAuthenticated: true,
-          loading: false,
-          user: data.user,
-          error: null
+          error: error.message,
+          loading: false
         }));
-        toast.success('Login successful');
-      } else {
-        setState(prev => ({
-          ...prev,
-          error: data.message
-        }));
-        toast.error(data.message || 'Login failed');
+        toast.error(error.message || 'Login failed');
+        return;
       }
+
+      toast.success('Login successful');
+      
     } catch (error) {
       console.error('Login error:', error);
       setState(prev => ({
         ...prev,
-        error: 'Server error'
+        error: 'Server error',
+        loading: false
       }));
       toast.error('Server error during login');
+    } finally {
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
   // Logout user
-  const logout = () => {
-    localStorage.removeItem('token');
-    setState(prev => ({
-      ...prev,
-      token: null,
-      isAuthenticated: false,
-      user: null
-    }));
-    toast.info('Logged out successfully');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        toast.error('Error during logout');
+        return;
+      }
+      
+      toast.info('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Server error during logout');
+    }
   };
 
   return (

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -14,9 +16,8 @@ export default function Register() {
     password: "",
     confirmPassword: ""
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const { register } = useAuth();
+  const [validationError, setValidationError] = useState("");
+  const { register, error, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,28 +27,24 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setValidationError("");
     
     // Validate form
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setValidationError("Passwords do not match");
       return;
     }
     
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setValidationError("Password must be at least 6 characters");
       return;
     }
     
-    setIsLoading(true);
-    
     try {
       await register(formData.username, formData.email, formData.password);
-      navigate("/dashboard");
+      // Auth state will handle redirection once email is verified
     } catch (error) {
       console.error("Registration failed:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -62,10 +59,15 @@ export default function Register() {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {validationError && (
+              <Alert variant="destructive">
+                <AlertDescription>{validationError}</AlertDescription>
+              </Alert>
+            )}
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -76,6 +78,7 @@ export default function Register() {
                 required
                 value={formData.username}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -88,6 +91,7 @@ export default function Register() {
                 required
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -100,6 +104,7 @@ export default function Register() {
                 required
                 value={formData.password}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -112,12 +117,18 @@ export default function Register() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create account"}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : "Create account"}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{" "}
