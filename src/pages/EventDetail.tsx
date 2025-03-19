@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEvents } from "@/context/EventContext";
@@ -28,34 +27,33 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const { getEvent, addTask, updateTask, deleteTask, toggleTaskComplete } = useEvents();
   
-  const [event, setEvent] = useState(getEvent(eventId || ""));
+  const [event, setEvent] = useState<null | undefined | any>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | undefined>(undefined);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Use an effect to refresh the event data when the component mounts
-  // or when the eventId changes
   useEffect(() => {
-    setLoading(true);
-    // Small timeout to ensure we get the latest data
-    const timer = setTimeout(() => {
-      const currentEvent = getEvent(eventId || "");
-      setEvent(currentEvent);
-      setLoading(false);
-    }, 100);
+    const loadEvent = () => {
+      setLoading(true);
+      if (!eventId) {
+        setEvent(null);
+        setLoading(false);
+        return;
+      }
+      
+      setTimeout(() => {
+        const foundEvent = getEvent(eventId);
+        console.log("Loading event:", foundEvent);
+        setEvent(foundEvent);
+        setLoading(false);
+      }, 100);
+    };
     
-    return () => clearTimeout(timer);
-  }, [eventId, getEvent]);
-  
-  // Add another effect to refresh the event data periodically
-  // to catch updates from other tabs
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      const currentEvent = getEvent(eventId || "");
-      setEvent(currentEvent);
-    }, 2000); // Check for updates every 2 seconds
+    loadEvent();
+    
+    const intervalId = setInterval(loadEvent, 1000);
     
     return () => clearInterval(intervalId);
   }, [eventId, getEvent]);
@@ -87,7 +85,6 @@ export default function EventDetail() {
   const handleAddTask = (taskData: Omit<Task, "id" | "completed">) => {
     addTask(event.id, taskData);
     setIsTaskFormOpen(false);
-    // Refresh event data after adding a task
     setEvent(getEvent(event.id));
   };
   
@@ -101,7 +98,6 @@ export default function EventDetail() {
       updateTask(event.id, currentTask.id, taskData);
       setCurrentTask(undefined);
       setIsTaskFormOpen(false);
-      // Refresh event data after updating a task
       setEvent(getEvent(event.id));
     }
   };
@@ -116,14 +112,12 @@ export default function EventDetail() {
       deleteTask(event.id, taskToDelete);
       setTaskToDelete(null);
       setShowDeleteDialog(false);
-      // Refresh event data after deleting a task
       setEvent(getEvent(event.id));
     }
   };
   
   const handleTaskComplete = (taskId: string, completed: boolean) => {
     toggleTaskComplete(event.id, taskId, completed);
-    // Refresh event data after toggling task completion
     setEvent(getEvent(event.id));
   };
   
@@ -259,7 +253,7 @@ export default function EventDetail() {
                     <TaskItem
                       key={task.id}
                       task={task}
-                      onComplete={(id, completed) => toggleTaskComplete(event.id, id, completed)}
+                      onComplete={(id, completed) => handleTaskComplete(event.id, id, completed)}
                       onDelete={(id) => handleDeleteClick(id)}
                       onEdit={handleEditTask}
                     />

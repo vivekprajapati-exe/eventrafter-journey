@@ -1,3 +1,4 @@
+
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { Event, EventContextType, Task } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -159,10 +160,11 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getEvent = (id: string) => {
+    // Get the most up-to-date events directly from localStorage
     const savedEvents = localStorage.getItem("events");
-    const currentEvents = savedEvents ? JSON.parse(savedEvents) : events;
+    const eventsData = savedEvents ? JSON.parse(savedEvents) : events;
     
-    return currentEvents.find((event) => event.id === id);
+    return eventsData.find((event: Event) => event.id === id);
   };
 
   const calculateProgress = (eventId: string) => {
