@@ -3,7 +3,7 @@ import { CalendarDays, Clock, MoreVertical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Event } from "@/types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,21 +20,30 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onDelete }: EventCardProps) {
+  const navigate = useNavigate();
+  
   const statusColors = {
     "Not Started": "bg-gray-200",
     "In Progress": "bg-blue-200 text-blue-800",
     "Completed": "bg-green-200 text-green-800",
     "Cancelled": "bg-red-200 text-red-800",
   };
+  
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/events/${event.id}`);
+  };
 
   return (
-    <div className="event-card bg-card rounded-lg border shadow-sm p-5">
+    <div className="event-card bg-card rounded-lg border shadow-sm p-5" 
+         onClick={handleViewDetails} 
+         role="button" 
+         tabIndex={0}
+         onKeyDown={(e) => e.key === 'Enter' && handleViewDetails(e as unknown as React.MouseEvent)}>
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-semibold text-lg truncate mb-1">
-            <Link to={`/events/${event.id}`} className="hover:text-primary">
-              {event.title}
-            </Link>
+            {event.title}
           </h3>
           <Badge 
             variant="outline" 
@@ -45,22 +54,37 @@ export default function EventCard({ event, onDelete }: EventCardProps) {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8"
+              onClick={(e) => e.stopPropagation()} // Prevent card click when clicking dropdown
+            >
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Link to={`/events/${event.id}`} className="w-full">View Details</Link>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={(e) => {
+              e.preventDefault();
+              navigate(`/events/${event.id}`);
+            }}>
+              View Details
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link to={`/events/${event.id}/edit`} className="w-full">Edit Event</Link>
+            <DropdownMenuItem onClick={(e) => {
+              e.preventDefault();
+              navigate(`/events/${event.id}/edit`);
+            }}>
+              Edit Event
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="text-red-600 focus:text-red-600"
-              onClick={() => onDelete(event.id)}
+              onClick={(e) => {
+                e.preventDefault(); 
+                e.stopPropagation();
+                onDelete(event.id);
+              }}
             >
               Delete Event
             </DropdownMenuItem>
