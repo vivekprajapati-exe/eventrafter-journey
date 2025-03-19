@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
@@ -21,7 +20,7 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   register: (username: string, email: string, password: string) => Promise<void>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -38,7 +37,6 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AuthState>(initialState);
 
-  // Load user on first render and set up listener
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -57,7 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Initial session check
     const initializeAuth = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -100,7 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Register user
   const register = async (username: string, email: string, password: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
@@ -142,8 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Login user
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -159,10 +154,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           loading: false
         }));
         toast.error(error.message || 'Login failed');
-        return;
+        return false;
       }
 
       toast.success('Login successful');
+      return true;
       
     } catch (error) {
       console.error('Login error:', error);
@@ -172,12 +168,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loading: false
       }));
       toast.error('Server error during login');
+      return false;
     } finally {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
 
-  // Logout user
   const logout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -209,7 +205,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

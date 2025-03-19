@@ -26,8 +26,11 @@ export default function Login() {
     e.preventDefault();
     
     try {
-      await login(formData.email, formData.password);
-      // The redirect will happen automatically via the auth state change
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        // Redirect to dashboard upon successful login
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login failed:", error);
     }
