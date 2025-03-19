@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
@@ -28,12 +28,49 @@ export default function EventDetail() {
   const navigate = useNavigate();
   const { getEvent, addTask, updateTask, deleteTask, toggleTaskComplete } = useEvents();
   
-  const event = getEvent(eventId || "");
-  
+  const [event, setEvent] = useState(getEvent(eventId || ""));
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | undefined>(undefined);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Use an effect to refresh the event data when the component mounts
+  // or when the eventId changes
+  useEffect(() => {
+    setLoading(true);
+    // Small timeout to ensure we get the latest data
+    const timer = setTimeout(() => {
+      const currentEvent = getEvent(eventId || "");
+      setEvent(currentEvent);
+      setLoading(false);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [eventId, getEvent]);
+  
+  // Add another effect to refresh the event data periodically
+  // to catch updates from other tabs
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const currentEvent = getEvent(eventId || "");
+      setEvent(currentEvent);
+    }, 2000); // Check for updates every 2 seconds
+    
+    return () => clearInterval(intervalId);
+  }, [eventId, getEvent]);
+  
+  if (loading) {
+    return (
+      <div className="container py-8 text-center">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-8"></div>
+          <div className="h-64 bg-gray-200 rounded w-full mb-4"></div>
+        </div>
+      </div>
+    );
+  }
   
   if (!event) {
     return (
@@ -50,6 +87,8 @@ export default function EventDetail() {
   const handleAddTask = (taskData: Omit<Task, "id" | "completed">) => {
     addTask(event.id, taskData);
     setIsTaskFormOpen(false);
+    // Refresh event data after adding a task
+    setEvent(getEvent(event.id));
   };
   
   const handleEditTask = (task: Task) => {
@@ -62,6 +101,8 @@ export default function EventDetail() {
       updateTask(event.id, currentTask.id, taskData);
       setCurrentTask(undefined);
       setIsTaskFormOpen(false);
+      // Refresh event data after updating a task
+      setEvent(getEvent(event.id));
     }
   };
   
@@ -75,7 +116,15 @@ export default function EventDetail() {
       deleteTask(event.id, taskToDelete);
       setTaskToDelete(null);
       setShowDeleteDialog(false);
+      // Refresh event data after deleting a task
+      setEvent(getEvent(event.id));
     }
+  };
+  
+  const handleTaskComplete = (taskId: string, completed: boolean) => {
+    toggleTaskComplete(event.id, taskId, completed);
+    // Refresh event data after toggling task completion
+    setEvent(getEvent(event.id));
   };
   
   const pendingTasks = event.tasks.filter(task => !task.completed);

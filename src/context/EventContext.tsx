@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { Event, EventContextType, Task } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -118,6 +117,18 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem("events", JSON.stringify(events));
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "events" && e.newValue) {
+        setEvents(JSON.parse(e.newValue));
+      }
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [events]);
 
   const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
@@ -148,7 +159,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getEvent = (id: string) => {
-    return events.find((event) => event.id === id);
+    const savedEvents = localStorage.getItem("events");
+    const currentEvents = savedEvents ? JSON.parse(savedEvents) : events;
+    
+    return currentEvents.find((event) => event.id === id);
   };
 
   const calculateProgress = (eventId: string) => {
