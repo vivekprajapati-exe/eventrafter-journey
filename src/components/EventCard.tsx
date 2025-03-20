@@ -29,17 +29,18 @@ export default function EventCard({ event, onDelete }: EventCardProps) {
     "Cancelled": "bg-red-200 text-red-800",
   };
   
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleViewDetails = () => {
     navigate(`/events/${event.id}`);
   };
 
   return (
-    <div className="event-card bg-card rounded-lg border shadow-sm p-5" 
-         onClick={handleViewDetails} 
-         role="button" 
-         tabIndex={0}
-         onKeyDown={(e) => e.key === 'Enter' && handleViewDetails(e as unknown as React.MouseEvent)}>
+    <div 
+      className="event-card bg-card rounded-lg border shadow-sm p-5 cursor-pointer hover:shadow-md transition-shadow" 
+      onClick={handleViewDetails}
+      role="button" 
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && handleViewDetails()}
+    >
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="font-semibold text-lg truncate mb-1">

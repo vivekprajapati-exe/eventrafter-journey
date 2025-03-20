@@ -32,9 +32,9 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/events" element={<EventList />} />
-                <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/events/:eventId" element={<EventDetail />} />
                 <Route path="/events/create" element={<EventCreate />} />
-                <Route path="/events/:id/edit" element={<EventEdit />} />
+                <Route path="/events/:eventId/edit" element={<EventEdit />} />
                 <Route path="/calendar" element={<Calendar />} />
               </Route>
             </Route>
