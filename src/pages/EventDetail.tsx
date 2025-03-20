@@ -43,19 +43,21 @@ export default function EventDetail() {
         return;
       }
       
-      setTimeout(() => {
+      try {
         const foundEvent = getEvent(eventId);
         console.log("Loading event:", foundEvent);
         setEvent(foundEvent);
+      } catch (error) {
+        console.error("Error loading event:", error);
+      } finally {
         setLoading(false);
-      }, 100);
+      }
     };
     
     loadEvent();
     
-    const intervalId = setInterval(loadEvent, 1000);
-    
-    return () => clearInterval(intervalId);
+    return () => {
+    };
   }, [eventId, getEvent]);
   
   if (loading) {
