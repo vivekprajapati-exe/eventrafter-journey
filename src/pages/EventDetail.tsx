@@ -253,7 +253,7 @@ export default function EventDetail() {
                     <TaskItem
                       key={task.id}
                       task={task}
-                      onComplete={(id, completed) => handleTaskComplete(event.id, id, completed)}
+                      onComplete={(id, completed) => handleTaskComplete(id, completed)}
                       onDelete={(id) => handleDeleteClick(id)}
                       onEdit={handleEditTask}
                     />
@@ -280,7 +280,7 @@ export default function EventDetail() {
                     <TaskItem
                       key={task.id}
                       task={task}
-                      onComplete={(id, completed) => toggleTaskComplete(event.id, id, completed)}
+                      onComplete={(id, completed) => handleTaskComplete(id, completed)}
                       onDelete={(id) => handleDeleteClick(id)}
                       onEdit={handleEditTask}
                     />
