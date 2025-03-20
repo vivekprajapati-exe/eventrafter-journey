@@ -1,9 +1,11 @@
+
 import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Clock, ListChecks, Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+
 export default function Dashboard() {
   const {
     events,
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const inProgressEvents = events.filter(event => event.status === "In Progress").length;
   const totalTasks = events.reduce((acc, event) => acc + event.tasks.length, 0);
   const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
+  
   return <div className="container py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -33,10 +36,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <Card>
+        <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Events</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <CalendarDays className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalEvents}</div>
@@ -45,10 +48,10 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgressEvents}</div>
@@ -57,10 +60,10 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Tasks</CardTitle>
-            <ListChecks className="h-4 w-4 text-muted-foreground" />
+            <ListChecks className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalTasks}</div>
@@ -69,10 +72,10 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Attendees</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -89,7 +92,7 @@ export default function Dashboard() {
       
       {upcomingEvents.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
           {upcomingEvents.map(event => <EventCard key={event.id} event={event} onDelete={deleteEvent} />)}
-        </div> : <Card className="mb-8">
+        </div> : <Card className="mb-8 bg-background/60 backdrop-blur-sm border-primary/10">
           <CardContent className="flex flex-col items-center justify-center p-6">
             <div className="text-center">
               <p className="mb-2 text-muted-foreground">No upcoming events</p>
@@ -103,7 +106,7 @@ export default function Dashboard() {
         </Card>}
       
       <div className="flex justify-center">
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild className="border-primary/20 hover:bg-primary/10">
           <Link to="/events">View All Events</Link>
         </Button>
       </div>

@@ -1,8 +1,18 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, List, Plus, LogOut, User } from "lucide-react";
+import { Calendar, List, Plus, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -43,18 +53,37 @@ export default function Header() {
                   </Button>
                 </Link>
               </nav>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm hidden md:inline-block">
-                  {user?.username}
-                </span>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => logout()}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
+              <div className="flex items-center">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="rounded-full aspect-square bg-primary/10 hover:bg-primary/20"
+                    >
+                      <User className="h-4 w-4 text-primary" />
+                      <span className="sr-only">User Profile</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent className="bg-background/90 backdrop-blur-md border-primary/10">
+                    <SheetHeader className="text-left">
+                      <SheetTitle className="text-primary">User Profile</SheetTitle>
+                      <SheetDescription>
+                        {user?.username || user?.email}
+                      </SheetDescription>
+                    </SheetHeader>
+                    <Separator className="my-4" />
+                    <div className="flex flex-col gap-4 mt-4">
+                      <Button 
+                        onClick={() => logout()}
+                        variant="outline"
+                        className="w-full justify-start border-primary/20 hover:bg-primary/10"
+                      >
+                        Logout
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
             </>
           ) : (
