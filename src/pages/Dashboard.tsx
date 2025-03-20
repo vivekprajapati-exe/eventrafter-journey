@@ -1,38 +1,29 @@
-
 import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Clock, ListChecks, Plus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-
 export default function Dashboard() {
-  const { events, deleteEvent } = useEvents();
+  const {
+    events,
+    deleteEvent
+  } = useEvents();
 
   // Get upcoming events (sorted by start date)
-  const upcomingEvents = [...events]
-    .filter((event) => event.status !== "Completed" && event.status !== "Cancelled")
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .slice(0, 3);
+  const upcomingEvents = [...events].filter(event => event.status !== "Completed" && event.status !== "Cancelled").sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 3);
 
   // Calculate stats
   const totalEvents = events.length;
-  const completedEvents = events.filter((event) => event.status === "Completed").length;
-  const inProgressEvents = events.filter((event) => event.status === "In Progress").length;
+  const completedEvents = events.filter(event => event.status === "Completed").length;
+  const inProgressEvents = events.filter(event => event.status === "In Progress").length;
   const totalTasks = events.reduce((acc, event) => acc + event.tasks.length, 0);
-  const completedTasks = events.reduce(
-    (acc, event) => acc + event.tasks.filter((task) => task.completed).length,
-    0
-  );
-
-  return (
-    <div className="container py-8">
+  const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
+  return <div className="container py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to EventRafter. Manage your events and tasks efficiently.
-          </p>
+          <p className="text-muted-foreground">Welcome to Event Manager. Manage your events and tasks efficiently.</p>
         </div>
         <Button asChild>
           <Link to="/events/new">
@@ -62,7 +53,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{inProgressEvents}</div>
             <p className="text-xs text-muted-foreground">
-              {Math.round((inProgressEvents / totalEvents) * 100) || 0}% of all events
+              {Math.round(inProgressEvents / totalEvents * 100) || 0}% of all events
             </p>
           </CardContent>
         </Card>
@@ -96,14 +87,9 @@ export default function Dashboard() {
 
       <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
       
-      {upcomingEvents.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-          {upcomingEvents.map((event) => (
-            <EventCard key={event.id} event={event} onDelete={deleteEvent} />
-          ))}
-        </div>
-      ) : (
-        <Card className="mb-8">
+      {upcomingEvents.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+          {upcomingEvents.map(event => <EventCard key={event.id} event={event} onDelete={deleteEvent} />)}
+        </div> : <Card className="mb-8">
           <CardContent className="flex flex-col items-center justify-center p-6">
             <div className="text-center">
               <p className="mb-2 text-muted-foreground">No upcoming events</p>
@@ -114,14 +100,12 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
       
       <div className="flex justify-center">
         <Button variant="outline" asChild>
           <Link to="/events">View All Events</Link>
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 }
