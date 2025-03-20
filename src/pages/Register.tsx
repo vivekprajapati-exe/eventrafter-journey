@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus, Mail, Lock, User } from "lucide-react";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -49,96 +49,132 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your information to create an account
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {validationError && (
-              <Alert variant="destructive">
-                <AlertDescription>{validationError}</AlertDescription>
-              </Alert>
-            )}
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                name="username"
-                placeholder="johndoe"
-                required
-                value={formData.username}
-                onChange={handleChange}
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-black/60">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-cream mb-2">Join Us</h1>
+          <p className="text-muted-foreground">Create an account to get started</p>
+        </div>
+        
+        <Card className="glass-card border-blue/20 shadow-xl backdrop-blur-xl">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-2xl font-bold text-center text-cream">Create an account</CardTitle>
+            <CardDescription className="text-center text-muted-foreground">
+              Enter your information to create an account
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              {validationError && (
+                <Alert variant="destructive" className="bg-red/20 border-red/40">
+                  <AlertDescription>{validationError}</AlertDescription>
+                </Alert>
+              )}
+              {error && (
+                <Alert variant="destructive" className="bg-red/20 border-red/40">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-cream">Username</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    id="username"
+                    name="username"
+                    placeholder="johndoe"
+                    required
+                    value={formData.username}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="pl-10 bg-background/50 border-blue/20 focus:border-blue"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-cream">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="pl-10 bg-background/50 border-blue/20 focus:border-blue"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-cream">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="pl-10 bg-background/50 border-blue/20 focus:border-blue"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-cream">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    disabled={loading}
+                    className="pl-10 bg-background/50 border-blue/20 focus:border-blue"
+                  />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 pb-6">
+              <Button 
+                type="submit" 
+                className="w-full bg-cream text-background hover:bg-cream/90" 
                 disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="your@email.com"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : "Create account"}
-            </Button>
-            <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-600 hover:text-blue-500">
-                Log in
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Create account
+                  </>
+                )}
+              </Button>
+              <div className="text-center text-sm">
+                Already have an account?{" "}
+                <Link to="/login" className="text-blue hover:text-blue/90 transition-colors font-medium">
+                  Log in
+                </Link>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }
