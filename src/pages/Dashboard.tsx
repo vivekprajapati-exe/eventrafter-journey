@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
+
 export default function Dashboard() {
   const {
     events,
@@ -17,16 +18,10 @@ export default function Dashboard() {
   const [selectedTab, setSelectedTab] = useState("upcoming");
   const [fadeIn, setFadeIn] = useState(false);
 
-  // Get upcoming events (sorted by start date)
   const upcomingEvents = [...events].filter(event => event.status !== "Completed" && event.status !== "Cancelled").sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 3);
-
-  // Get recently completed events
   const completedEvents = [...events].filter(event => event.status === "Completed").sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()).slice(0, 3);
-
-  // Get high priority events
   const highPriorityEvents = [...events].filter(event => event.tasks.some(task => task.priority === "High" && !task.completed)).slice(0, 3);
 
-  // Calculate stats
   const totalEvents = events.length;
   const completedEventsCount = events.filter(event => event.status === "Completed").length;
   const inProgressEvents = events.filter(event => event.status === "In Progress").length;
@@ -34,7 +29,6 @@ export default function Dashboard() {
   const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
   const completionRate = totalTasks > 0 ? Math.round(completedTasks / totalTasks * 100) : 0;
 
-  // Animated progress effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimatedProgress(completionRate);
@@ -42,18 +36,18 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, [completionRate]);
 
-  // Animation effect for content
   useEffect(() => {
     setFadeIn(true);
   }, []);
+
   return <div className={`container py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome to Event Manager. Manage your events and tasks efficiently.</p>
         </div>
-        <Button asChild className="bg-[#c1121f] hover:bg-[#780000]">
-          <Link to="/events/new" className="the begie type color pallete that is already there in navbar\n">
+        <Button asChild>
+          <Link to="/events/new" className="flex items-center">
             <Plus className="mr-2 h-4 w-4" /> New Event
           </Link>
         </Button>
@@ -112,7 +106,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Overall Progress Section */}
       <Card className="mb-8 bg-background/60 backdrop-blur-sm border-primary/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -149,14 +142,13 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Tabs for different event views */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <h2 className="text-xl font-semibold mb-4 md:mb-0">Event Overview</h2>
           <TabsList className="bg-background/60">
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-[#c1121f] data-[state=active]:text-white">
               <CalendarDays className="mr-2 h-4 w-4" />
-              Upcoming
+              <span className="text-green-500 font-medium">Upcoming</span>
             </TabsTrigger>
             <TabsTrigger value="completed" className="data-[state=active]:bg-[#669bbc] data-[state=active]:text-white">
               <CheckCircle className="mr-2 h-4 w-4" />
