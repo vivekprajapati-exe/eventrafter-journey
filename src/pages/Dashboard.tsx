@@ -53,7 +53,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground">Welcome to Event Manager. Manage your events and tasks efficiently.</p>
         </div>
         <Button asChild className="bg-[#c1121f] hover:bg-[#780000]">
-          <Link to="/events/new" className="">
+          <Link to="/events/new" className="the begie type color pallete that is already there in navbar\n">
             <Plus className="mr-2 h-4 w-4" /> New Event
           </Link>
         </Button>
