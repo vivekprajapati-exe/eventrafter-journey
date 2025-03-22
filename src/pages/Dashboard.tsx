@@ -1,4 +1,3 @@
-
 import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
@@ -9,29 +8,23 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
-
 export default function Dashboard() {
-  const { events, deleteEvent } = useEvents();
+  const {
+    events,
+    deleteEvent
+  } = useEvents();
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [selectedTab, setSelectedTab] = useState("upcoming");
   const [fadeIn, setFadeIn] = useState(false);
 
   // Get upcoming events (sorted by start date)
-  const upcomingEvents = [...events]
-    .filter(event => event.status !== "Completed" && event.status !== "Cancelled")
-    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-    .slice(0, 3);
+  const upcomingEvents = [...events].filter(event => event.status !== "Completed" && event.status !== "Cancelled").sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 3);
 
   // Get recently completed events
-  const completedEvents = [...events]
-    .filter(event => event.status === "Completed")
-    .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime())
-    .slice(0, 3);
+  const completedEvents = [...events].filter(event => event.status === "Completed").sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()).slice(0, 3);
 
   // Get high priority events
-  const highPriorityEvents = [...events]
-    .filter(event => event.tasks.some(task => task.priority === "High" && !task.completed))
-    .slice(0, 3);
+  const highPriorityEvents = [...events].filter(event => event.tasks.some(task => task.priority === "High" && !task.completed)).slice(0, 3);
 
   // Calculate stats
   const totalEvents = events.length;
@@ -39,14 +32,13 @@ export default function Dashboard() {
   const inProgressEvents = events.filter(event => event.status === "In Progress").length;
   const totalTasks = events.reduce((acc, event) => acc + event.tasks.length, 0);
   const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
-  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const completionRate = totalTasks > 0 ? Math.round(completedTasks / totalTasks * 100) : 0;
 
   // Animated progress effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimatedProgress(completionRate);
     }, 500);
-    
     return () => clearTimeout(timer);
   }, [completionRate]);
 
@@ -54,16 +46,14 @@ export default function Dashboard() {
   useEffect(() => {
     setFadeIn(true);
   }, []);
-
-  return (
-    <div className={`container py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+  return <div className={`container py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome to Event Manager. Manage your events and tasks efficiently.</p>
         </div>
         <Button asChild className="bg-[#c1121f] hover:bg-[#780000]">
-          <Link to="/events/new">
+          <Link to="/events/new" className="">
             <Plus className="mr-2 h-4 w-4" /> New Event
           </Link>
         </Button>
@@ -180,14 +170,9 @@ export default function Dashboard() {
         </div>
         
         <TabsContent value="upcoming" className="mt-0 space-y-4">
-          {upcomingEvents.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {upcomingEvents.map(event => (
-                <EventCard key={event.id} event={event} onDelete={deleteEvent} />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
+          {upcomingEvents.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {upcomingEvents.map(event => <EventCard key={event.id} event={event} onDelete={deleteEvent} />)}
+            </div> : <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <div className="text-center">
                   <p className="mb-2 text-muted-foreground">No upcoming events</p>
@@ -198,56 +183,38 @@ export default function Dashboard() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </TabsContent>
         
         <TabsContent value="completed" className="mt-0 space-y-4">
-          {completedEvents.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {completedEvents.map(event => (
-                <EventCard key={event.id} event={event} onDelete={deleteEvent} />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
+          {completedEvents.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {completedEvents.map(event => <EventCard key={event.id} event={event} onDelete={deleteEvent} />)}
+            </div> : <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <div className="text-center">
                   <p className="mb-2 text-muted-foreground">No completed events yet</p>
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </TabsContent>
         
         <TabsContent value="priority" className="mt-0 space-y-4">
-          {highPriorityEvents.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {highPriorityEvents.map(event => (
-                <EventCard key={event.id} event={event} onDelete={deleteEvent} />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
+          {highPriorityEvents.length > 0 ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {highPriorityEvents.map(event => <EventCard key={event.id} event={event} onDelete={deleteEvent} />)}
+            </div> : <Card className="bg-background/60 backdrop-blur-sm border-primary/10">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <div className="text-center">
                   <p className="mb-2 text-muted-foreground">No high priority events</p>
                 </div>
               </CardContent>
-            </Card>
-          )}
+            </Card>}
         </TabsContent>
       </Tabs>
       
       <div className="flex justify-center">
-        <Button 
-          variant="outline" 
-          asChild 
-          className="border-primary/20 hover:bg-primary/10 transform transition-transform hover:scale-105"
-        >
+        <Button variant="outline" asChild className="border-primary/20 hover:bg-primary/10 transform transition-transform hover:scale-105">
           <Link to="/events">View All Events</Link>
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 }
