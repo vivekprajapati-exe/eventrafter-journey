@@ -1,13 +1,16 @@
+
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { UserRole } from "@/types";
 
 export interface User {
   id: string;
   username: string | null;
   email: string | null;
   avatar_url?: string | null;
+  role: UserRole;
 }
 
 export interface AuthState {
@@ -22,6 +25,7 @@ export interface AuthContextType extends AuthState {
   register: (username: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  hasPermission: (requiredRole: UserRole) => boolean;
 }
 
 const initialState: AuthState = {
@@ -40,18 +44,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setState(prev => ({
-          ...prev,
-          session,
-          isAuthenticated: !!session,
-          user: session ? {
-            id: session.user.id,
-            username: session.user.user_metadata.username || null,
-            email: session.user.email,
-            avatar_url: session.user.user_metadata.avatar_url || null
-          } : null,
-          loading: false
-        }));
+        if (session) {
+          // Get user role from metadata or default to attendee
+          const userRole = session.user.user_metadata.role as UserRole || 'attendee';
+          
+          setState(prev => ({
+            ...prev,
+            session,
+            isAuthenticated: true,
+            user: {
+              id: session.user.id,
+              username: session.user.user_metadata.username || null,
+              email: session.user.email,
+              avatar_url: session.user.user_metadata.avatar_url || null,
+              role: userRole
+            },
+            loading: false
+          }));
+        } else {
+          setState(prev => ({
+            ...prev,
+            session: null,
+            isAuthenticated: false,
+            user: null,
+            loading: false
+          }));
+        }
       }
     );
 
@@ -65,13 +83,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (session) {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('username, avatar_url')
+          .select('username, avatar_url, role')
           .eq('id', session.user.id)
           .single();
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
         }
+
+        // Get user role from profile or metadata or default to attendee
+        const userRole = (profile?.role as UserRole) || 
+                        (session.user.user_metadata.role as UserRole) || 
+                        'attendee';
 
         setState(prev => ({
           ...prev,
@@ -81,7 +104,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: session.user.id,
             username: profile?.username || session.user.user_metadata.username || null,
             email: session.user.email,
-            avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null
+            avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null,
+            role: userRole
           },
           loading: false
         }));
@@ -106,7 +130,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           data: {
-            username
+            username,
+            role: 'attendee' // Default role for new users
           }
         }
       });
@@ -191,13 +216,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Function to check if user has required role or higher
+  const hasPermission = (requiredRole: UserRole): boolean => {
+    if (!state.user) return false;
+    
+    const roleHierarchy: Record<UserRole, number> = {
+      'admin': 3,
+      'organizer': 2,
+      'attendee': 1
+    };
+    
+    const userRoleLevel = roleHierarchy[state.user.role] || 0;
+    const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
+    
+    return userRoleLevel >= requiredRoleLevel;
+  };
+
   return (
     <AuthContext.Provider
       value={{
         ...state,
         register,
         login,
-        logout
+        logout,
+        hasPermission
       }}
     >
       {children}

@@ -1,4 +1,3 @@
-
 export interface Task {
   id: string;
   title: string;
@@ -32,4 +31,14 @@ export interface EventContextType {
   updateTask: (eventId: string, taskId: string, task: Partial<Task>) => void;
   deleteTask: (eventId: string, taskId: string) => void;
   toggleTaskComplete: (eventId: string, taskId: string, completed: boolean) => void;
+}
+
+export type UserRole = 'admin' | 'organizer' | 'attendee';
+
+export interface User {
+  id: string;
+  username: string | null;
+  email: string | null;
+  avatar_url?: string | null;
+  role: UserRole;
 }

@@ -1,4 +1,3 @@
-
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Task } from "@/types";
@@ -10,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface TaskItemProps {
   task: Task;
@@ -19,6 +20,9 @@ interface TaskItemProps {
 }
 
 export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskItemProps) {
+  const { user, hasPermission } = useAuth();
+  const canEdit = hasPermission('organizer');
+  
   const priorityColors = {
     Low: "bg-blue-100 text-blue-800 hover:bg-blue-200",
     Medium: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
@@ -26,8 +30,13 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
   };
 
   const handleCheckboxChange = (checked: boolean) => {
-    // Immediate local state reflection
-    onComplete(task.id, checked);
+    // Only organizers and admins can mark tasks as complete/incomplete
+    if (hasPermission('organizer')) {
+      onComplete(task.id, checked);
+    } else {
+      // For attendees, we show a message that they don't have permission
+      toast.error('You do not have permission to complete tasks');
+    }
   };
 
   return (
@@ -37,6 +46,7 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
           checked={task.completed} 
           onCheckedChange={handleCheckboxChange}
           className={`${task.completed ? "text-green-500" : ""} cursor-pointer`}
+          disabled={!hasPermission('organizer')}
         />
         
         <div className={`flex-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
@@ -55,25 +65,27 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
           {task.priority}
         </Badge>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onEdit(task)}>
-              <Edit className="mr-2 h-4 w-4" /> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="text-red-600 focus:text-red-600"
-              onClick={() => onDelete(task.id)}
-            >
-              <Trash className="mr-2 h-4 w-4" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {canEdit && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(task)}>
+                <Edit className="mr-2 h-4 w-4" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-red-600 focus:text-red-600"
+                onClick={() => onDelete(task.id)}
+              >
+                <Trash className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   );

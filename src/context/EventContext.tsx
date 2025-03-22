@@ -1,8 +1,10 @@
 
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { Event, EventContextType, Task } from "@/types";
+import { Event, EventContextType, Task, UserRole } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const initialEvents: Event[] = [
   {
@@ -111,12 +113,15 @@ const initialEvents: Event[] = [
 export const EventContext = createContext<EventContextType | undefined>(undefined);
 
 export const EventProvider = ({ children }: { children: ReactNode }) => {
+  const { user, hasPermission } = useAuth();
   const [events, setEvents] = useState<Event[]>(() => {
     const savedEvents = localStorage.getItem("events");
     return savedEvents ? JSON.parse(savedEvents) : initialEvents;
   });
 
   useEffect(() => {
+    // This is a temporary solution using localStorage
+    // In a real-world app, we would use Supabase to store events
     localStorage.setItem("events", JSON.stringify(events));
     
     const handleStorageChange = (e: StorageEvent) => {
@@ -132,7 +137,18 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [events]);
 
+  // Only allow certain actions if user has appropriate permissions
+  const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
+    if (!hasPermission(requiredRole)) {
+      toast.error(`You do not have permission to ${action}`);
+      return false;
+    }
+    return true;
+  };
+
   const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
+    if (!checkPermission('create events')) return "";
+    
     const newEvent: Event = {
       ...event,
       id: uuidv4(),
@@ -146,6 +162,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateEvent = (id: string, updatedData: Partial<Event>) => {
+    if (!checkPermission('update events')) return;
+    
     setEvents((prevEvents) =>
       prevEvents.map((event) =>
         event.id === id ? { ...event, ...updatedData } : event
@@ -155,12 +173,13 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteEvent = (id: string) => {
+    if (!checkPermission('delete events', 'admin')) return;
+    
     setEvents((prevEvents) => prevEvents.filter((event) => event.id !== id));
     toast.success("Event deleted successfully");
   };
 
   const getEvent = (id: string) => {
-    // Get the most up-to-date events from state
     return events.find((event) => event.id === id);
   };
 
@@ -183,6 +202,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addTask = (eventId: string, task: Omit<Task, "id" | "completed">) => {
+    if (!checkPermission('add tasks')) return;
+    
     const newTask: Task = {
       ...task,
       id: uuidv4(),
@@ -209,6 +230,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateTask = (eventId: string, taskId: string, updatedData: Partial<Task>) => {
+    if (!checkPermission('update tasks')) return;
+    
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
         if (event.id === eventId) {
@@ -230,6 +253,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteTask = (eventId: string, taskId: string) => {
+    if (!checkPermission('delete tasks')) return;
+    
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
         if (event.id === eventId) {
@@ -249,6 +274,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleTaskComplete = (eventId: string, taskId: string, completed: boolean) => {
+    if (!checkPermission('complete tasks')) return;
+    
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
         if (event.id === eventId) {

@@ -8,13 +8,22 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, UserPlus, Mail, Lock, User } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { UserRole } from "@/types";
 
 export default function Register() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "attendee" as UserRole
   });
   const [validationError, setValidationError] = useState("");
   const { register, error, loading } = useAuth();
@@ -23,6 +32,10 @@ export default function Register() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoleChange = (value: string) => {
+    setFormData(prev => ({ ...prev, role: value as UserRole }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,6 +122,20 @@ export default function Register() {
                     className="pl-10 bg-background/50 border-blue/20 focus:border-blue"
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-cream">Role</Label>
+                <Select onValueChange={handleRoleChange} value={formData.role} disabled={loading}>
+                  <SelectTrigger className="bg-background/50 border-blue/20 focus:border-blue">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="attendee">Attendee</SelectItem>
+                    <SelectItem value="organizer">Organizer</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
