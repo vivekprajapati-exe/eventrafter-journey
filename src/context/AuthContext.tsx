@@ -81,34 +81,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (session) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('username, avatar_url, role')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          // Fetch profile data including the new role field
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('username, avatar_url, role')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+            // Continue with metadata fallback
+          }
+
+          // Get user role from profile or metadata or default to attendee
+          const userRole = (profile?.role as UserRole) || 
+                          (session.user.user_metadata.role as UserRole) || 
+                          'attendee';
+
+          setState(prev => ({
+            ...prev,
+            session,
+            isAuthenticated: true,
+            user: {
+              id: session.user.id,
+              username: profile?.username || session.user.user_metadata.username || null,
+              email: session.user.email,
+              avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null,
+              role: userRole
+            },
+            loading: false
+          }));
+        } catch (error) {
+          console.error('Error in auth initialization:', error);
+          setState(prev => ({ ...prev, loading: false }));
         }
-
-        // Get user role from profile or metadata or default to attendee
-        const userRole = (profile?.role as UserRole) || 
-                        (session.user.user_metadata.role as UserRole) || 
-                        'attendee';
-
-        setState(prev => ({
-          ...prev,
-          session,
-          isAuthenticated: true,
-          user: {
-            id: session.user.id,
-            username: profile?.username || session.user.user_metadata.username || null,
-            email: session.user.email,
-            avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null,
-            role: userRole
-          },
-          loading: false
-        }));
       } else {
         setState(prev => ({ ...prev, loading: false }));
       }
