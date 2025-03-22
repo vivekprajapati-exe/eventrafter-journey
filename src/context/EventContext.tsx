@@ -160,21 +160,25 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getEvent = (id: string) => {
-    // Get the most up-to-date events directly from localStorage
-    const savedEvents = localStorage.getItem("events");
-    const eventsData = savedEvents ? JSON.parse(savedEvents) : events;
-    
-    return eventsData.find((event: Event) => event.id === id);
+    // Get the most up-to-date events from state
+    return events.find((event) => event.id === id);
   };
 
   const calculateProgress = (eventId: string) => {
     const event = getEvent(eventId);
-    if (!event || event.tasks.length === 0) return 0;
+    if (!event) return 0;
+    if (event.tasks.length === 0) return 0;
 
     const completedTasks = event.tasks.filter((task) => task.completed).length;
     const progress = Math.round((completedTasks / event.tasks.length) * 100);
 
-    updateEvent(eventId, { progress });
+    // Update the event with the new progress
+    setEvents(prevEvents => 
+      prevEvents.map(e => 
+        e.id === eventId ? { ...e, progress } : e
+      )
+    );
+
     return progress;
   };
 
@@ -189,16 +193,18 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       prevEvents.map((event) => {
         if (event.id === eventId) {
           const updatedTasks = [...event.tasks, newTask];
-          return {
+          const updatedEvent = {
             ...event,
             tasks: updatedTasks,
           };
+          return updatedEvent;
         }
         return event;
       })
     );
 
-    calculateProgress(eventId);
+    // Calculate progress after state update
+    setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task added successfully");
   };
 
@@ -218,7 +224,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    calculateProgress(eventId);
+    // Calculate progress after state update
+    setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task updated successfully");
   };
 
@@ -236,12 +243,32 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    calculateProgress(eventId);
+    // Calculate progress after state update
+    setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task deleted successfully");
   };
 
   const toggleTaskComplete = (eventId: string, taskId: string, completed: boolean) => {
-    updateTask(eventId, taskId, { completed });
+    setEvents((prevEvents) =>
+      prevEvents.map((event) => {
+        if (event.id === eventId) {
+          const updatedTasks = event.tasks.map((task) =>
+            task.id === taskId ? { ...task, completed } : task
+          );
+          
+          const completedTasksCount = updatedTasks.filter(t => t.completed).length;
+          const totalTasks = updatedTasks.length;
+          const progress = totalTasks > 0 ? Math.round((completedTasksCount / totalTasks) * 100) : 0;
+          
+          return {
+            ...event,
+            tasks: updatedTasks,
+            progress
+          };
+        }
+        return event;
+      })
+    );
     
     if (completed) {
       toast.success("Task marked as complete");

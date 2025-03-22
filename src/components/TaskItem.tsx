@@ -1,5 +1,5 @@
 
-import { Check, Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Task } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,13 +25,18 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
     High: "bg-red-100 text-red-800 hover:bg-red-200",
   };
 
+  const handleCheckboxChange = (checked: boolean) => {
+    // Immediate local state reflection
+    onComplete(task.id, checked);
+  };
+
   return (
     <div className={`task-item flex items-center justify-between p-3 rounded-md ${task.completed ? 'bg-muted/30' : ''}`}>
       <div className="flex items-center gap-3 flex-1">
         <Checkbox 
           checked={task.completed} 
-          onCheckedChange={(checked) => onComplete(task.id, !!checked)}
-          className={task.completed ? "text-green-500" : ""}
+          onCheckedChange={handleCheckboxChange}
+          className={`${task.completed ? "text-green-500" : ""} cursor-pointer`}
         />
         
         <div className={`flex-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
