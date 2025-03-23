@@ -8,7 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
-
 export default function Dashboard() {
   const {
     events,
@@ -17,29 +16,24 @@ export default function Dashboard() {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [selectedTab, setSelectedTab] = useState("upcoming");
   const [fadeIn, setFadeIn] = useState(false);
-
   const upcomingEvents = [...events].filter(event => event.status !== "Completed" && event.status !== "Cancelled").sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()).slice(0, 3);
   const completedEvents = [...events].filter(event => event.status === "Completed").sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()).slice(0, 3);
   const highPriorityEvents = [...events].filter(event => event.tasks.some(task => task.priority === "High" && !task.completed)).slice(0, 3);
-
   const totalEvents = events.length;
   const completedEventsCount = events.filter(event => event.status === "Completed").length;
   const inProgressEvents = events.filter(event => event.status === "In Progress").length;
   const totalTasks = events.reduce((acc, event) => acc + event.tasks.length, 0);
   const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
   const completionRate = totalTasks > 0 ? Math.round(completedTasks / totalTasks * 100) : 0;
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setAnimatedProgress(completionRate);
     }, 500);
     return () => clearTimeout(timer);
   }, [completionRate]);
-
   useEffect(() => {
     setFadeIn(true);
   }, []);
-
   return <div className={`container py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -148,7 +142,7 @@ export default function Dashboard() {
           <TabsList className="bg-background/60">
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-[#c1121f] data-[state=active]:text-white">
               <CalendarDays className="mr-2 h-4 w-4" />
-              <span className="text-green-500 font-medium">Upcoming</span>
+              <span className="font-medium text-slate-50">Upcoming</span>
             </TabsTrigger>
             <TabsTrigger value="completed" className="data-[state=active]:bg-[#669bbc] data-[state=active]:text-white">
               <CheckCircle className="mr-2 h-4 w-4" />
