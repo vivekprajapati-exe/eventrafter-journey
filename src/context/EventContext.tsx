@@ -1,3 +1,4 @@
+
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { Event, EventContextType, Task, UserRole, BudgetItem } from "@/types";
 import { v4 as uuidv4 } from "uuid";
@@ -257,8 +258,13 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   }, [events]);
 
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
-    // Allow all actions during development - we'll comment this out so it can be uncommented
-    // when testing locally, but shouldn't be used in production
+    // DEBUGGING: Add console logs to help diagnose permission issues
+    console.log('Checking permission:', action);
+    console.log('Current user:', user);
+    console.log('Required role:', requiredRole);
+    console.log('Has permission result:', hasPermission(requiredRole));
+    
+    // Allow all actions during development for testing
     // return true;
     
     if (!hasPermission(requiredRole)) {
@@ -269,7 +275,13 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addEvent = (event: Omit<Event, "id" | "progress" | "tasks" | "budget">) => {
-    if (!checkPermission('create events')) return "";
+    console.log("Attempting to create event with user role:", user?.role);
+    
+    // Check permission and log the result for debugging
+    const hasPermissionResult = checkPermission('create events');
+    console.log("Permission check result:", hasPermissionResult);
+    
+    if (!hasPermissionResult) return "";
     
     const newEvent: Event = {
       ...event,
@@ -277,7 +289,7 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       progress: 0,
       tasks: [],
       budget: {
-        totalEstimated: 0,
+        totalEstimated: parseFloat(event.budget?.totalEstimated.toString() || "0"),
         totalActual: 0,
         items: []
       }

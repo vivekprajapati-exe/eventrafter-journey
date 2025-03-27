@@ -225,7 +225,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Function to check if user has required role or higher
   const hasPermission = (requiredRole: UserRole): boolean => {
-    if (!state.user) return false;
+    // Add debugging logs
+    console.log("hasPermission check:");
+    console.log("- Current user:", state.user);
+    console.log("- Required role:", requiredRole);
+    
+    if (!state.user) {
+      console.log("- Result: false (no user)");
+      return false;
+    }
     
     const roleHierarchy: Record<UserRole, number> = {
       'admin': 3,
@@ -236,7 +244,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRoleLevel = roleHierarchy[state.user.role] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
     
-    return userRoleLevel >= requiredRoleLevel;
+    const result = userRoleLevel >= requiredRoleLevel;
+    console.log(`- User role level: ${userRoleLevel}, Required level: ${requiredRoleLevel}`);
+    console.log(`- Result: ${result}`);
+    
+    return result;
   };
 
   return (
@@ -257,7 +269,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

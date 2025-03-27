@@ -2,14 +2,27 @@
 import { useNavigate } from "react-router-dom";
 import { useEvents } from "@/context/EventContext";
 import EventForm from "@/components/EventForm";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 export default function EventCreate() {
   const navigate = useNavigate();
   const { addEvent } = useEvents();
+  const { user } = useAuth();
   
   const handleCreateEvent = (eventData: any) => {
+    console.log("Creating event with data:", eventData);
+    console.log("Current user role:", user?.role);
+    
+    // Attempt to create the event
     const newEventId = addEvent(eventData);
-    navigate(`/events/${newEventId}`);
+    
+    if (newEventId) {
+      toast.success("Event created successfully!");
+      navigate(`/events/${newEventId}`);
+    } else {
+      toast.error("Failed to create event. Please check your permissions.");
+    }
   };
   
   return (

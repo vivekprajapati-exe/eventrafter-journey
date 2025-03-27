@@ -84,6 +84,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted with data:", formData);
     
     if (!formData.title) {
       toast.error("Event title is required");
@@ -101,6 +102,9 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
       totalActual: 0,
       items: []
     };
+
+    // Log the budget being created
+    console.log("Creating event with budget:", initialBudget);
 
     onSubmit({
       ...formData,
