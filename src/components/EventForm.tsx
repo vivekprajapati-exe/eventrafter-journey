@@ -9,11 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Event } from "@/types";
 import { toast } from "sonner";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 interface EventFormProps {
   event?: Event;
@@ -33,6 +34,7 @@ interface FormData {
   endTime: string;
   status: EventStatus;
   attendees: string;
+  estimatedBudget: string;
 }
 
 export default function EventForm({ event, onSubmit, isLoading = false }: EventFormProps) {
@@ -48,6 +50,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
     endTime: "17:00",
     status: "Not Started",
     attendees: "0",
+    estimatedBudget: "0",
   });
 
   useEffect(() => {
@@ -62,6 +65,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         endTime: event.endTime,
         status: event.status,
         attendees: event.attendees.toString(),
+        estimatedBudget: event.budget.totalEstimated.toString(),
       });
     }
   }, [event]);
@@ -98,14 +102,14 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
 
     // Create an initial budget object for new events
     const initialBudget = {
-      totalEstimated: 0,
+      totalEstimated: parseFloat(formData.estimatedBudget) || 0,
       totalActual: 0,
       items: []
     };
 
     onSubmit({
       ...formData,
-      attendees: parseInt(formData.attendees),
+      attendees: parseInt(formData.attendees) || 0,
       status: formData.status as EventStatus,
       budget: initialBudget // Add the budget property
     });
@@ -244,6 +248,26 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
               onChange={handleChange}
               placeholder="Enter event location"
             />
+          </div>
+          
+          <Separator className="my-2" />
+          
+          <div className="space-y-2">
+            <Label htmlFor="estimatedBudget">Estimated Budget</Label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                id="estimatedBudget"
+                name="estimatedBudget"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.estimatedBudget}
+                onChange={handleChange}
+                placeholder="Enter estimated budget"
+                className="pl-10"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
@@ -61,7 +60,7 @@ export default function EventList() {
           </p>
         </div>
         <Button asChild>
-          <Link to="/events/new">
+          <Link to="/events/create">
             <Plus className="mr-2 h-4 w-4" /> New Event
           </Link>
         </Button>
@@ -114,7 +113,7 @@ export default function EventList() {
               : "Create your first event to get started"}
           </p>
           <Button asChild>
-            <Link to="/events/new">
+            <Link to="/events/create">
               <Plus className="mr-2 h-4 w-4" /> Create Event
             </Link>
           </Button>

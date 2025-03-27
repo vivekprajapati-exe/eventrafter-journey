@@ -257,6 +257,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   }, [events]);
 
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
+    // Allow all actions during development - we'll comment this out so it can be uncommented
+    // when testing locally, but shouldn't be used in production
+    // return true;
+    
     if (!hasPermission(requiredRole)) {
       toast.error(`You do not have permission to ${action}`);
       return false;
