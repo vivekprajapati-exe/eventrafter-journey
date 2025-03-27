@@ -96,10 +96,18 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
       return;
     }
 
+    // Create an initial budget object for new events
+    const initialBudget = {
+      totalEstimated: 0,
+      totalActual: 0,
+      items: []
+    };
+
     onSubmit({
       ...formData,
       attendees: parseInt(formData.attendees),
       status: formData.status as EventStatus,
+      budget: initialBudget // Add the budget property
     });
   };
 

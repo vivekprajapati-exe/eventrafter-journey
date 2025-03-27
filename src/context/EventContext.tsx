@@ -241,8 +241,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    // This is a temporary solution using localStorage
-    // In a real-world app, we would use Supabase to store events
     localStorage.setItem("events", JSON.stringify(events));
     
     const handleStorageChange = (e: StorageEvent) => {
@@ -258,7 +256,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [events]);
 
-  // Only allow certain actions if user has appropriate permissions
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
     if (!hasPermission(requiredRole)) {
       toast.error(`You do not have permission to ${action}`);
@@ -317,7 +314,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     const completedTasks = event.tasks.filter((task) => task.completed).length;
     const progress = Math.round((completedTasks / event.tasks.length) * 100);
 
-    // Update the event with the new progress
     setEvents(prevEvents => 
       prevEvents.map(e => 
         e.id === eventId ? { ...e, progress } : e
@@ -350,7 +346,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate progress after state update
     setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task added successfully");
   };
@@ -373,7 +368,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate progress after state update
     setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task updated successfully");
   };
@@ -394,7 +388,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate progress after state update
     setTimeout(() => calculateProgress(eventId), 0);
     toast.success("Task deleted successfully");
   };
@@ -477,7 +470,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate budget totals after state update
     setTimeout(() => calculateBudgetTotals(eventId), 0);
     toast.success("Budget item added successfully");
   };
@@ -503,7 +495,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate budget totals after state update
     setTimeout(() => calculateBudgetTotals(eventId), 0);
     toast.success("Budget item updated successfully");
   };
@@ -527,7 +518,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       })
     );
 
-    // Calculate budget totals after state update
     setTimeout(() => calculateBudgetTotals(eventId), 0);
     toast.success("Budget item deleted successfully");
   };
