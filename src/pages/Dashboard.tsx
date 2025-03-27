@@ -30,38 +30,42 @@ export default function Dashboard() {
   const completedTasks = events.reduce((acc, event) => acc + event.tasks.filter(task => task.completed).length, 0);
   const completionRate = totalTasks > 0 ? Math.round(completedTasks / totalTasks * 100) : 0;
   
-  // Budget statistics
-  const totalEstimatedBudget = events.reduce((sum, event) => sum + event.budget.totalEstimated, 0);
-  const totalActualExpenses = events.reduce((sum, event) => sum + event.budget.totalActual, 0);
+  // Budget statistics with null checks
+  const totalEstimatedBudget = events.reduce((sum, event) => sum + (event.budget?.totalEstimated || 0), 0);
+  const totalActualExpenses = events.reduce((sum, event) => sum + (event.budget?.totalActual || 0), 0);
   const budgetVariance = totalEstimatedBudget - totalActualExpenses;
   const isUnderBudget = budgetVariance >= 0;
   
-  // Budget by category data for charts
+  // Budget by category data for charts with null checks
   const categoryData = events.reduce((acc, event) => {
-    event.budget.items.forEach(item => {
-      const existingCategory = acc.find(c => c.name === item.category);
-      if (existingCategory) {
-        existingCategory.value += item.actualAmount;
-      } else {
-        acc.push({
-          name: item.category,
-          value: item.actualAmount
-        });
-      }
-    });
+    if (event.budget?.items) {
+      event.budget.items.forEach(item => {
+        const existingCategory = acc.find(c => c.name === item.category);
+        if (existingCategory) {
+          existingCategory.value += item.actualAmount;
+        } else {
+          acc.push({
+            name: item.category,
+            value: item.actualAmount
+          });
+        }
+      });
+    }
     return acc;
   }, [] as Array<{ name: string; value: number }>);
   
-  // Budget by event status 
+  // Budget by event status with null checks
   const budgetByStatus = events.reduce((acc, event) => {
-    const existingStatus = acc.find(s => s.name === event.status);
-    if (existingStatus) {
-      existingStatus.value += event.budget.totalActual;
-    } else if (event.budget.totalActual > 0) {
-      acc.push({
-        name: event.status,
-        value: event.budget.totalActual
-      });
+    if (event.budget?.totalActual) {
+      const existingStatus = acc.find(s => s.name === event.status);
+      if (existingStatus) {
+        existingStatus.value += event.budget.totalActual;
+      } else if (event.budget.totalActual > 0) {
+        acc.push({
+          name: event.status,
+          value: event.budget.totalActual
+        });
+      }
     }
     return acc;
   }, [] as Array<{ name: string; value: number }>);
@@ -80,14 +84,14 @@ export default function Dashboard() {
     setFadeIn(true);
   }, []);
 
-  // Event budget comparison data
+  // Event budget comparison data with null checks
   const eventBudgetData = events
-    .filter(event => event.budget.totalEstimated > 0 || event.budget.totalActual > 0)
+    .filter(event => (event.budget?.totalEstimated || 0) > 0 || (event.budget?.totalActual || 0) > 0)
     .slice(0, 5)
     .map(event => ({
       name: event.title.length > 15 ? `${event.title.substring(0, 15)}...` : event.title,
-      estimated: event.budget.totalEstimated,
-      actual: event.budget.totalActual
+      estimated: event.budget?.totalEstimated || 0,
+      actual: event.budget?.totalActual || 0
     }));
   
   return <div className={`container py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
