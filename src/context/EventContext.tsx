@@ -274,7 +274,7 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  const addEvent = (event: Omit<Event, "id" | "progress" | "tasks" | "budget">) => {
+  const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
     console.log("Attempting to create event with user role:", user?.role);
     
     // Check permission and log the result for debugging
@@ -289,7 +289,7 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       progress: 0,
       tasks: [],
       budget: {
-        totalEstimated: parseFloat(event.budget?.totalEstimated.toString() || "0"),
+        totalEstimated: event.budget.totalEstimated,
         totalActual: 0,
         items: []
       }

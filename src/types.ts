@@ -38,7 +38,7 @@ export interface Event {
 
 export interface EventContextType {
   events: Event[];
-  addEvent: (event: Omit<Event, "id" | "progress" | "tasks" | "budget">) => string;
+  addEvent: (event: Omit<Event, "id" | "progress" | "tasks">) => string;
   updateEvent: (id: string, event: Partial<Event>) => void;
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => Event | undefined;
