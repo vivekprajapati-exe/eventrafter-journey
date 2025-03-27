@@ -12,16 +12,15 @@ export default function EventCreate() {
   
   const handleCreateEvent = (eventData: any) => {
     console.log("Creating event with data:", eventData);
-    console.log("Current user role:", user?.role);
     
-    // Attempt to create the event
+    // Attempt to create the event without role check
     const newEventId = addEvent(eventData);
     
     if (newEventId) {
       toast.success("Event created successfully!");
       navigate(`/events/${newEventId}`);
     } else {
-      toast.error("Failed to create event. Please check your permissions.");
+      toast.error("Failed to create event. Please try again.");
     }
   };
   

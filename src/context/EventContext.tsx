@@ -267,6 +267,11 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     // Allow all actions during development for testing
     // return true;
     
+    // Skip permission check for "create events" - allow all authenticated users
+    if (action === 'create events') {
+      return true;
+    }
+    
     if (!hasPermission(requiredRole)) {
       toast.error(`You do not have permission to ${action}`);
       return false;
@@ -277,11 +282,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
     console.log("Attempting to create event with user role:", user?.role);
     
-    // Check permission and log the result for debugging
-    const hasPermissionResult = checkPermission('create events');
-    console.log("Permission check result:", hasPermissionResult);
-    
-    if (!hasPermissionResult) return "";
+    // Always allow event creation regardless of user role
+    // So we don't need to check permission here
     
     const newEvent: Event = {
       ...event,
