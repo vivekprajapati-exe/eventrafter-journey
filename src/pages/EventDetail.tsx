@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEvents } from "@/context/EventContext";
@@ -6,32 +7,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import TaskItem from "@/components/TaskItem";
 import TaskForm from "@/components/TaskForm";
-import { Task } from "@/types";
-import { CalendarDays, ChevronLeft, Clock, Edit, MapPin, Plus, Users } from "lucide-react";
+import BudgetForm from "@/components/BudgetForm";
+import BudgetItem from "@/components/BudgetItem";
+import BudgetChart from "@/components/BudgetChart";
+import { Task, BudgetItem as BudgetItemType } from "@/types";
+import { CalendarDays, ChevronLeft, Clock, Edit, MapPin, Plus, Users, DollarSign } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+
 export default function EventDetail() {
-  const {
-    eventId
-  } = useParams<{
-    eventId: string;
-  }>();
+  const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
+  
   const {
     getEvent,
     addTask,
     updateTask,
     deleteTask,
-    toggleTaskComplete
+    toggleTaskComplete,
+    addBudgetItem,
+    updateBudgetItem,
+    deleteBudgetItem
   } = useEvents();
+  
   const [event, setEvent] = useState<null | undefined | any>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [isBudgetFormOpen, setIsBudgetFormOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | undefined>(undefined);
+  const [currentBudgetItem, setCurrentBudgetItem] = useState<BudgetItemType | undefined>(undefined);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteBudgetDialog, setShowDeleteBudgetDialog] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [budgetItemToDelete, setBudgetItemToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("tasks");
+  
   useEffect(() => {
     const loadEvent = () => {
       setLoading(true);
@@ -50,9 +62,11 @@ export default function EventDetail() {
         setLoading(false);
       }
     };
+    
     loadEvent();
     return () => {};
   }, [eventId, getEvent]);
+
   if (loading) {
     return <div className="container py-8 text-center">
         <div className="animate-pulse">
@@ -62,6 +76,7 @@ export default function EventDetail() {
         </div>
       </div>;
   }
+
   if (!event) {
     return <div className="container py-16 text-center">
         <h2 className="text-2xl font-semibold mb-4">Event not found</h2>
@@ -71,15 +86,19 @@ export default function EventDetail() {
         </Button>
       </div>;
   }
+
+  // Task handlers
   const handleAddTask = (taskData: Omit<Task, "id" | "completed">) => {
     addTask(event.id, taskData);
     setIsTaskFormOpen(false);
     setEvent(getEvent(event.id));
   };
+
   const handleEditTask = (task: Task) => {
     setCurrentTask(task);
     setIsTaskFormOpen(true);
   };
+
   const handleUpdateTask = (taskData: Omit<Task, "id" | "completed">) => {
     if (currentTask) {
       updateTask(event.id, currentTask.id, taskData);
@@ -88,11 +107,13 @@ export default function EventDetail() {
       setEvent(getEvent(event.id));
     }
   };
+
   const handleDeleteClick = (taskId: string) => {
     setTaskToDelete(taskId);
     setShowDeleteDialog(true);
   };
-  const confirmDelete = () => {
+
+  const confirmDeleteTask = () => {
     if (taskToDelete) {
       deleteTask(event.id, taskToDelete);
       setTaskToDelete(null);
@@ -100,18 +121,51 @@ export default function EventDetail() {
       setEvent(getEvent(event.id));
     }
   };
+
   const handleTaskComplete = (taskId: string, completed: boolean) => {
     toggleTaskComplete(event.id, taskId, completed);
     setEvent(getEvent(event.id));
   };
+
+  // Budget handlers
+  const handleAddBudgetItem = (itemData: Omit<BudgetItemType, "id">) => {
+    addBudgetItem(event.id, itemData);
+    setIsBudgetFormOpen(false);
+    setEvent(getEvent(event.id));
+  };
+
+  const handleEditBudgetItem = (item: BudgetItemType) => {
+    setCurrentBudgetItem(item);
+    setIsBudgetFormOpen(true);
+  };
+
+  const handleUpdateBudgetItem = (itemData: Omit<BudgetItemType, "id">) => {
+    if (currentBudgetItem) {
+      updateBudgetItem(event.id, currentBudgetItem.id, itemData);
+      setCurrentBudgetItem(undefined);
+      setIsBudgetFormOpen(false);
+      setEvent(getEvent(event.id));
+    }
+  };
+
+  const handleDeleteBudgetClick = (itemId: string) => {
+    setBudgetItemToDelete(itemId);
+    setShowDeleteBudgetDialog(true);
+  };
+
+  const confirmDeleteBudgetItem = () => {
+    if (budgetItemToDelete) {
+      deleteBudgetItem(event.id, budgetItemToDelete);
+      setBudgetItemToDelete(null);
+      setShowDeleteBudgetDialog(false);
+      setEvent(getEvent(event.id));
+    }
+  };
+  
+  // Filtered tasks
   const pendingTasks = event.tasks.filter(task => !task.completed);
   const completedTasks = event.tasks.filter(task => task.completed);
-  const statusColors = {
-    "Not Started": "bg-gray-200",
-    "In Progress": "bg-blue-200 text-blue-800",
-    "Completed": "bg-green-200 text-green-800",
-    "Cancelled": "bg-red-200 text-red-800"
-  };
+
   return <div className="container py-8">
       <div className="mb-8">
         <Button variant="outline" size="sm" asChild className="mb-6">
@@ -136,9 +190,15 @@ export default function EventDetail() {
                 <Edit className="mr-2 h-4 w-4" /> Edit Event
               </Link>
             </Button>
-            <Button onClick={() => setIsTaskFormOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Task
-            </Button>
+            {activeTab === "tasks" ? (
+              <Button onClick={() => setIsTaskFormOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Task
+              </Button>
+            ) : (
+              <Button onClick={() => setIsBudgetFormOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Add Budget Item
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -182,7 +242,7 @@ export default function EventDetail() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Tasks Summary</CardTitle>
+            <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -202,50 +262,127 @@ export default function EventDetail() {
                 <span className="text-sm font-medium">High Priority</span>
                 <span className="text-red-600">{event.tasks.filter(t => t.priority === "High").length}</span>
               </div>
+              <div className="border-t pt-2 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Budget</span>
+                  <span className="font-mono">${event.budget.totalEstimated.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-sm font-medium">Actual Spent</span>
+                  <span className="font-mono">${event.budget.totalActual.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
       
-      <Tabs defaultValue="pending" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-8">
         <TabsList>
-          <TabsTrigger value="pending" className="flex gap-2">
-            Pending <Badge variant="outline">{pendingTasks.length}</Badge>
+          <TabsTrigger value="tasks" className="flex gap-2">
+            Tasks <Badge variant="outline">{event.tasks.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="flex gap-2">
-            Completed <Badge variant="outline">{completedTasks.length}</Badge>
+          <TabsTrigger value="budget" className="flex gap-2">
+            Budget <Badge variant="outline">{event.budget.items.length}</Badge>
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="pending" className="mt-4">
-          <Card>
-            <CardContent className="p-6">
-              {pendingTasks.length > 0 ? <div className="space-y-2">
-                  {pendingTasks.map(task => <TaskItem key={task.id} task={task} onComplete={(id, completed) => handleTaskComplete(id, completed)} onDelete={id => handleDeleteClick(id)} onEdit={handleEditTask} />)}
-                </div> : <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">No pending tasks</p>
-                  <Button size="sm" onClick={() => setIsTaskFormOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" /> Add Task
-                  </Button>
-                </div>}
-            </CardContent>
-          </Card>
+        <TabsContent value="tasks" className="mt-4">
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList>
+              <TabsTrigger value="pending" className="flex gap-2">
+                Pending <Badge variant="outline">{pendingTasks.length}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="flex gap-2">
+                Completed <Badge variant="outline">{completedTasks.length}</Badge>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="pending" className="mt-4">
+              <Card>
+                <CardContent className="p-6">
+                  {pendingTasks.length > 0 ? <div className="space-y-2">
+                      {pendingTasks.map(task => <TaskItem key={task.id} task={task} onComplete={(id, completed) => handleTaskComplete(id, completed)} onDelete={id => handleDeleteClick(id)} onEdit={handleEditTask} />)}
+                    </div> : <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">No pending tasks</p>
+                      <Button size="sm" onClick={() => setIsTaskFormOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" /> Add Task
+                      </Button>
+                    </div>}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="completed" className="mt-4">
+              <Card>
+                <CardContent className="p-6">
+                  {completedTasks.length > 0 ? <div className="space-y-2">
+                      {completedTasks.map(task => <TaskItem key={task.id} task={task} onComplete={(id, completed) => handleTaskComplete(id, completed)} onDelete={id => handleDeleteClick(id)} onEdit={handleEditTask} />)}
+                    </div> : <div className="text-center py-8">
+                      <p className="text-muted-foreground">No completed tasks yet</p>
+                    </div>}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
         
-        <TabsContent value="completed" className="mt-4">
+        <TabsContent value="budget" className="mt-4 space-y-6">
           <Card>
             <CardContent className="p-6">
-              {completedTasks.length > 0 ? <div className="space-y-2">
-                  {completedTasks.map(task => <TaskItem key={task.id} task={task} onComplete={(id, completed) => handleTaskComplete(id, completed)} onDelete={id => handleDeleteClick(id)} onEdit={handleEditTask} />)}
-                </div> : <div className="text-center py-8">
-                  <p className="text-muted-foreground">No completed tasks yet</p>
-                </div>}
+              <BudgetChart 
+                items={event.budget.items} 
+                totalEstimated={event.budget.totalEstimated} 
+                totalActual={event.budget.totalActual} 
+              />
             </CardContent>
           </Card>
+          
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Budget Items</h3>
+            <Button onClick={() => setIsBudgetFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Add Budget Item
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {event.budget.items.length > 0 ? (
+              event.budget.items.map(item => (
+                <BudgetItem 
+                  key={item.id} 
+                  item={item} 
+                  onEdit={handleEditBudgetItem} 
+                  onDelete={handleDeleteBudgetClick} 
+                />
+              ))
+            ) : (
+              <Card className="col-span-full">
+                <CardContent className="p-6 text-center">
+                  <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">No budget items added yet</p>
+                  <Button onClick={() => setIsBudgetFormOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Add Your First Budget Item
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
       
-      <TaskForm open={isTaskFormOpen} onOpenChange={setIsTaskFormOpen} task={currentTask} onSubmit={currentTask ? handleUpdateTask : handleAddTask} />
+      <TaskForm 
+        open={isTaskFormOpen} 
+        onOpenChange={setIsTaskFormOpen} 
+        task={currentTask} 
+        onSubmit={currentTask ? handleUpdateTask : handleAddTask} 
+      />
+      
+      <BudgetForm 
+        open={isBudgetFormOpen} 
+        onOpenChange={setIsBudgetFormOpen} 
+        item={currentBudgetItem} 
+        onSubmit={currentBudgetItem ? handleUpdateBudgetItem : handleAddBudgetItem} 
+      />
       
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -257,7 +394,24 @@ export default function EventDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction onClick={confirmDeleteTask} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={showDeleteBudgetDialog} onOpenChange={setShowDeleteBudgetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Budget Item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will permanently delete this budget item. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteBudgetItem} className="bg-red-600 hover:bg-red-700">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

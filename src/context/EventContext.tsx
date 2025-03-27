@@ -1,6 +1,5 @@
-
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { Event, EventContextType, Task, UserRole } from "@/types";
+import { Event, EventContextType, Task, UserRole, BudgetItem } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -42,6 +41,52 @@ const initialEvents: Event[] = [
         priority: "Medium",
       },
     ],
+    budget: {
+      totalEstimated: 15000,
+      totalActual: 12500,
+      items: [
+        {
+          id: "b1",
+          category: "Venue",
+          description: "Conference hall rental",
+          estimatedAmount: 5000,
+          actualAmount: 5500,
+          status: "Completed"
+        },
+        {
+          id: "b2",
+          category: "Catering",
+          description: "Food and beverages",
+          estimatedAmount: 3500,
+          actualAmount: 3200,
+          status: "Completed"
+        },
+        {
+          id: "b3",
+          category: "Equipment",
+          description: "AV equipment rental",
+          estimatedAmount: 2500,
+          actualAmount: 2000,
+          status: "Completed"
+        },
+        {
+          id: "b4",
+          category: "Marketing",
+          description: "Promotional materials",
+          estimatedAmount: 1500,
+          actualAmount: 1000,
+          status: "Completed"
+        },
+        {
+          id: "b5",
+          category: "Speakers",
+          description: "Speaker fees and accommodations",
+          estimatedAmount: 2500,
+          actualAmount: 800,
+          status: "In Progress"
+        }
+      ]
+    }
   },
   {
     id: "2",
@@ -71,6 +116,44 @@ const initialEvents: Event[] = [
         priority: "Medium",
       },
     ],
+    budget: {
+      totalEstimated: 8000,
+      totalActual: 4500,
+      items: [
+        {
+          id: "b6",
+          category: "Venue",
+          description: "Tech hub rental",
+          estimatedAmount: 2000,
+          actualAmount: 2000,
+          status: "Completed"
+        },
+        {
+          id: "b7",
+          category: "Marketing",
+          description: "Press kits and media",
+          estimatedAmount: 3000,
+          actualAmount: 1500,
+          status: "In Progress"
+        },
+        {
+          id: "b8",
+          category: "Refreshments",
+          description: "Drinks and snacks",
+          estimatedAmount: 1000,
+          actualAmount: 1000,
+          status: "Completed"
+        },
+        {
+          id: "b9",
+          category: "Demo Equipment",
+          description: "Special hardware for demo",
+          estimatedAmount: 2000,
+          actualAmount: 0,
+          status: "Planned"
+        }
+      ]
+    }
   },
   {
     id: "3",
@@ -107,6 +190,44 @@ const initialEvents: Event[] = [
         priority: "Medium",
       },
     ],
+    budget: {
+      totalEstimated: 12000,
+      totalActual: 11800,
+      items: [
+        {
+          id: "b10",
+          category: "Accommodations",
+          description: "Hotel rooms for 50 people",
+          estimatedAmount: 6000,
+          actualAmount: 5800,
+          status: "Completed"
+        },
+        {
+          id: "b11",
+          category: "Transportation",
+          description: "Bus rental",
+          estimatedAmount: 2000,
+          actualAmount: 2200,
+          status: "Completed"
+        },
+        {
+          id: "b12",
+          category: "Activities",
+          description: "Team building facilitators",
+          estimatedAmount: 3000,
+          actualAmount: 2800,
+          status: "Completed"
+        },
+        {
+          id: "b13",
+          category: "Meals",
+          description: "All meals for 3 days",
+          estimatedAmount: 1000,
+          actualAmount: 1000,
+          status: "Completed"
+        }
+      ]
+    }
   },
 ];
 
@@ -146,7 +267,7 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
-  const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
+  const addEvent = (event: Omit<Event, "id" | "progress" | "tasks" | "budget">) => {
     if (!checkPermission('create events')) return "";
     
     const newEvent: Event = {
@@ -154,6 +275,11 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       id: uuidv4(),
       progress: 0,
       tasks: [],
+      budget: {
+        totalEstimated: 0,
+        totalActual: 0,
+        items: []
+      }
     };
 
     setEvents((prevEvents) => [...prevEvents, newEvent]);
@@ -304,6 +430,108 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const calculateBudgetTotals = (eventId: string) => {
+    const event = getEvent(eventId);
+    if (!event) return;
+
+    const totalEstimated = event.budget.items.reduce((sum, item) => sum + item.estimatedAmount, 0);
+    const totalActual = event.budget.items.reduce((sum, item) => sum + item.actualAmount, 0);
+
+    setEvents(prevEvents => 
+      prevEvents.map(e => 
+        e.id === eventId ? { 
+          ...e, 
+          budget: {
+            ...e.budget,
+            totalEstimated,
+            totalActual
+          } 
+        } : e
+      )
+    );
+
+    return { totalEstimated, totalActual };
+  };
+
+  const addBudgetItem = (eventId: string, item: Omit<BudgetItem, "id">) => {
+    if (!checkPermission('add budget items')) return;
+    
+    const newItem: BudgetItem = {
+      ...item,
+      id: uuidv4(),
+    };
+
+    setEvents((prevEvents) =>
+      prevEvents.map((event) => {
+        if (event.id === eventId) {
+          const updatedItems = [...event.budget.items, newItem];
+          return {
+            ...event,
+            budget: {
+              ...event.budget,
+              items: updatedItems,
+            },
+          };
+        }
+        return event;
+      })
+    );
+
+    // Calculate budget totals after state update
+    setTimeout(() => calculateBudgetTotals(eventId), 0);
+    toast.success("Budget item added successfully");
+  };
+
+  const updateBudgetItem = (eventId: string, itemId: string, updatedData: Partial<BudgetItem>) => {
+    if (!checkPermission('update budget items')) return;
+    
+    setEvents((prevEvents) =>
+      prevEvents.map((event) => {
+        if (event.id === eventId) {
+          const updatedItems = event.budget.items.map((item) =>
+            item.id === itemId ? { ...item, ...updatedData } : item
+          );
+          return {
+            ...event,
+            budget: {
+              ...event.budget,
+              items: updatedItems,
+            },
+          };
+        }
+        return event;
+      })
+    );
+
+    // Calculate budget totals after state update
+    setTimeout(() => calculateBudgetTotals(eventId), 0);
+    toast.success("Budget item updated successfully");
+  };
+
+  const deleteBudgetItem = (eventId: string, itemId: string) => {
+    if (!checkPermission('delete budget items')) return;
+    
+    setEvents((prevEvents) =>
+      prevEvents.map((event) => {
+        if (event.id === eventId) {
+          const updatedItems = event.budget.items.filter((item) => item.id !== itemId);
+          return {
+            ...event,
+            budget: {
+              ...event.budget,
+              items: updatedItems,
+            },
+          };
+        }
+        return event;
+      })
+    );
+
+    // Calculate budget totals after state update
+    setTimeout(() => calculateBudgetTotals(eventId), 0);
+    toast.success("Budget item deleted successfully");
+  };
+
   return (
     <EventContext.Provider
       value={{
@@ -316,6 +544,9 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
         updateTask,
         deleteTask,
         toggleTaskComplete,
+        addBudgetItem,
+        updateBudgetItem,
+        deleteBudgetItem,
       }}
     >
       {children}

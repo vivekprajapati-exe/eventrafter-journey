@@ -7,6 +7,15 @@ export interface Task {
   priority: "Low" | "Medium" | "High";
 }
 
+export interface BudgetItem {
+  id: string;
+  category: string;
+  description: string;
+  estimatedAmount: number;
+  actualAmount: number;
+  status: "Planned" | "In Progress" | "Completed";
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -20,11 +29,16 @@ export interface Event {
   attendees: number;
   progress: number;
   tasks: Task[];
+  budget: {
+    totalEstimated: number;
+    totalActual: number;
+    items: BudgetItem[];
+  };
 }
 
 export interface EventContextType {
   events: Event[];
-  addEvent: (event: Omit<Event, "id" | "progress" | "tasks">) => void;
+  addEvent: (event: Omit<Event, "id" | "progress" | "tasks" | "budget">) => string;
   updateEvent: (id: string, event: Partial<Event>) => void;
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => Event | undefined;
@@ -32,6 +46,9 @@ export interface EventContextType {
   updateTask: (eventId: string, taskId: string, task: Partial<Task>) => void;
   deleteTask: (eventId: string, taskId: string) => void;
   toggleTaskComplete: (eventId: string, taskId: string, completed: boolean) => void;
+  addBudgetItem: (eventId: string, item: Omit<BudgetItem, "id">) => void;
+  updateBudgetItem: (eventId: string, itemId: string, item: Partial<BudgetItem>) => void;
+  deleteBudgetItem: (eventId: string, itemId: string) => void;
 }
 
 export type UserRole = 'admin' | 'organizer' | 'attendee';
