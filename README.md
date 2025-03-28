@@ -1,69 +1,62 @@
-# Welcome to your Lovable project
+# Event Manager Web App
 
-## Project info
+## Project Overview
+This **Event Manager Web App** is developed as a part of our **college hackathon project**. It provides a seamless solution for managing events, tracking tasks, and handling budgets efficiently. The app features a user-friendly interface with interactive charts to visualize budget and task data, making event planning easier and more organized.
 
-**URL**: https://lovable.dev/projects/47b11a92-d326-45e1-a593-5a5a71039ce2
+## Features
+- **Event Creation:** Users can create events with details like start time, end time, date, venue, budget, and expected attendees.
+- **Task Management:** Assign and track tasks for each event.
+- **Budget Tracking:** Monitor expenses and view visual representations using interactive charts.
+- **User Authentication:** Secure login and sign-up to ensure data privacy.
+- **Personalized Dashboard:** Users can access and manage their own events separately.
 
-## How can I edit this code?
+## Tech Stack
+- **React:** Frontend framework for building the UI.
+- **Tailwind CSS:** Styling framework for a sleek and responsive design.
+- **ShadCN:** Pre-designed UI components for an enhanced user experience.
+- **React Redux:** State management and navigation handling.
+- **Node.js & Express.js:** Server-side logic and API handling.
+- **SQL (Supabase):** Cloud database for data storage and management.
 
-There are several ways of editing your application.
+## Installation & Setup
+### Prerequisites
+Ensure you have the following installed:
+- Node.js
+- npm or yarn
 
-**Use Lovable**
+### Steps
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/event-manager.git
+   cd event-manager
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Start the development server:
+   ```sh
+   npm start
+   ```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/47b11a92-d326-45e1-a593-5a5a71039ce2) and start prompting.
+## How to Use
+1. Register or log in to the app.
+2. Create an event by entering relevant details.
+3. Add tasks and set budgets for better organization.
+4. View analytics through interactive graphs.
+5. Manage and track events through the personalized dashboard.
 
-Changes made via Lovable will be committed automatically to this repo.
+## Project Goal
+This project was developed for our college hackathon with the aim of showcasing our technical skills and problem-solving abilities. The goal was to build an intuitive and scalable event management system that simplifies event planning and budgeting.
 
-**Use your preferred IDE**
+## Future Enhancements
+- **Collaboration Features:** Allow multiple users to manage an event.
+- **AI-based Budget Optimization:** Provide smart budget recommendations.
+- **Mobile App Integration:** Extend the platform to mobile devices.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## License
+This project is developed as part of our college hackathon and is open for further improvements.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Contact
+For any queries, reach out to us at [scuti.bgstar@gmail.com](mailto:your-email@example.com).
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/47b11a92-d326-45e1-a593-5a5a71039ce2) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
