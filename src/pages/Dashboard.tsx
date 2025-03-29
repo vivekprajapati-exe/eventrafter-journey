@@ -206,29 +206,6 @@ export default function Dashboard() {
             <CardDescription>Expenses by category and status</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    innerRadius={40}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={formatCurrency} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
             <div className="mt-6">
               <h4 className="text-sm font-medium mb-2">Top Events by Budget</h4>
               <div className="h-[200px]">
