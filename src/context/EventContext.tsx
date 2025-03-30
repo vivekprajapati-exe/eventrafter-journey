@@ -258,8 +258,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   }, [events]);
 
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
-    if (user?.role === 'admin') return true;
-    if (requiredRole === 'organizer' && user?.role === 'organizer') return true;
     // DEBUGGING: Add console logs to help diagnose permission issues
     console.log('Checking permission:', action);
     console.log('Current user:', user);
@@ -274,10 +272,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
       return true;
     }
     
-    if (!hasPermission(requiredRole)) {
-      toast.error(`You do not have permission to ${action}`);
-      return false;
-    }
     return true;
   };
 

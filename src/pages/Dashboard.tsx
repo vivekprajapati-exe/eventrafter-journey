@@ -205,7 +205,10 @@ export default function Dashboard() {
             </CardTitle>
             <CardDescription>Expenses by category and status</CardDescription>
           </CardHeader>
+<<<<<<< HEAD
 
+=======
+>>>>>>> b595336e0730686318df437f98cffd3418fc1d01
           <CardContent>
             <div className="mt-6">
               <h4 className="text-sm font-medium mb-2">Top Events by Budget</h4>
