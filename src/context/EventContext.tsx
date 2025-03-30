@@ -94,8 +94,8 @@ const initialEvents: Event[] = [
     title: "Product Launch",
     description: "Launch event for our new software product",
     location: "Tech Hub",
-    startDate: "2023-11-20",
-    endDate: "2023-11-20",
+    startDate: "2025-03-20",
+    endDate: "2025-03-20",
     startTime: "14:00",
     endTime: "20:00",
     status: "Not Started",
@@ -258,6 +258,8 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   }, [events]);
 
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
+    if (user?.role === 'admin') return true;
+    if (requiredRole === 'organizer' && user?.role === 'organizer') return true;
     // DEBUGGING: Add console logs to help diagnose permission issues
     console.log('Checking permission:', action);
     console.log('Current user:', user);

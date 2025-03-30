@@ -22,7 +22,7 @@ export interface AuthState {
 }
 
 export interface AuthContextType extends AuthState {
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string , role:UserRole) => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   hasPermission: (requiredRole: UserRole) => boolean;
@@ -43,92 +43,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         if (session) {
-          // Get user role from metadata or default to attendee
-          const userRole = session.user.user_metadata.role as UserRole || 'attendee';
-          
-          setState(prev => ({
-            ...prev,
-            session,
-            isAuthenticated: true,
-            user: {
-              id: session.user.id,
-              username: session.user.user_metadata.username || null,
-              email: session.user.email,
-              avatar_url: session.user.user_metadata.avatar_url || null,
-              role: userRole
-            },
-            loading: false
-          }));
+          try {
+            // FIRST: Get FRESH profile data
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('username, avatar_url, role')
+              .eq('id', session.user.id)
+              .single();
+
+            // FIX: Handle missing profile gracefully
+            const roleSource = profile?.role 
+              || session.user.user_metadata?.role 
+              || 'admin';
+
+            setState({
+              session,
+              isAuthenticated: true,
+              user: {
+                id: session.user.id,
+                username: profile?.username || session.user.user_metadata?.username || null,
+                email: session.user.email,
+                avatar_url: profile?.avatar_url || session.user.user_metadata?.avatar_url || null,
+                role: roleSource as UserRole
+              },
+              loading: false,
+              error: null
+            });
+
+          } catch (error) {
+            console.error('Auth state error:', error);
+            setState(prev => ({ ...prev, loading: false }));
+          }
         } else {
-          setState(prev => ({
-            ...prev,
-            session: null,
-            isAuthenticated: false,
-            user: null,
-            loading: false
-          }));
+          setState(prev => ({ ...prev, loading: false }));
         }
       }
     );
 
-    const initializeAuth = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-      }
-
-      if (session) {
-        try {
-          // Fetch profile data including the new role field
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('username, avatar_url, role')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching profile:', profileError);
-            // Continue with metadata fallback
-          }
-
-          // Get user role from profile or metadata or default to attendee
-          const userRole = (profile?.role as UserRole) || 
-                          (session.user.user_metadata.role as UserRole) || 
-                          'attendee';
-
-          setState(prev => ({
-            ...prev,
-            session,
-            isAuthenticated: true,
-            user: {
-              id: session.user.id,
-              username: profile?.username || session.user.user_metadata.username || null,
-              email: session.user.email,
-              avatar_url: profile?.avatar_url || session.user.user_metadata.avatar_url || null,
-              role: userRole
-            },
-            loading: false
-          }));
-        } catch (error) {
-          console.error('Error in auth initialization:', error);
-          setState(prev => ({ ...prev, loading: false }));
-        }
-      } else {
-        setState(prev => ({ ...prev, loading: false }));
-      }
-    };
-
-    initializeAuth();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription?.unsubscribe();
   }, []);
 
-  const register = async (username: string, email: string, password: string) => {
+
+  const register = async (username: string, email: string, password: string, role: UserRole) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -138,7 +96,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         options: {
           data: {
             username,
-            role: 'attendee' // Default role for new users
+            role: role
           }
         }
       });
@@ -154,6 +112,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (data.user) {
+        // Update profiles table with role
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            username,
+            role
+          });
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          toast.error('Failed to save profile data');
+          return;
+        }
+
         toast.success('Registration successful. Please verify your email.');
       }
       
@@ -169,6 +142,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setState(prev => ({ ...prev, loading: false }));
     }
   };
+
+
+
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -241,8 +217,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       'attendee': 1
     };
     
-    const userRoleLevel = roleHierarchy[state.user.role] || 0;
-    const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
+    const userRoleLevel = roleHierarchy[state.user.role] || 3;
+    const requiredRoleLevel = roleHierarchy[requiredRole] || 3;
     
     const result = userRoleLevel >= requiredRoleLevel;
     console.log(`- User role level: ${userRoleLevel}, Required level: ${requiredRoleLevel}`);

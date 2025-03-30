@@ -18,6 +18,7 @@ import {
 import { UserRole } from "@/types";
 
 export default function Register() {
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -54,8 +55,8 @@ export default function Register() {
     }
     
     try {
-      await register(formData.username, formData.email, formData.password);
-      // Auth state will handle redirection once email is verified
+      // Add formData.role as last parameter
+      await register(formData.username, formData.email, formData.password, formData.role);
     } catch (error) {
       console.error("Registration failed:", error);
     }

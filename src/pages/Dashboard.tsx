@@ -3,7 +3,7 @@ import { useEvents } from "@/context/EventContext";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Clock, ListChecks, Plus, Users, Zap, TrendingUp, Calendar, CheckCircle, DollarSign, PieChart } from "lucide-react";
+import { CalendarDays, Clock, ListChecks, Plus, Users, Zap, TrendingUp, Calendar, CheckCircle, DollarSign, PieChart , IndianRupee} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,7 +71,7 @@ export default function Dashboard() {
   }, [] as Array<{ name: string; value: number }>);
   
   const COLORS = ['#003049', '#780000', '#c1121f', '#669bbc', '#fdf0d5'];
-  const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
+  const formatCurrency = (value: number) => `₹ ${value.toFixed(2)}`;
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -147,7 +147,7 @@ export default function Dashboard() {
         <Card className="bg-background/60 backdrop-blur-sm border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Budget</CardTitle>
-            <DollarSign className="h-4 w-4 text-primary" />
+            <IndianRupee className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -205,30 +205,8 @@ export default function Dashboard() {
             </CardTitle>
             <CardDescription>Expenses by category and status</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-[250px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    innerRadius={40}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={formatCurrency} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
 
+          <CardContent>
             <div className="mt-6">
               <h4 className="text-sm font-medium mb-2">Top Events by Budget</h4>
               <div className="h-[200px]">
@@ -238,7 +216,7 @@ export default function Dashboard() {
                     margin={{ top: 5, right: 5, left: 5, bottom: 40 }}
                   >
                     <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                    <YAxis tickFormatter={(value) => `$${value}`} />
+                    <YAxis tickFormatter={(value) => `₹${value}`} />
                     <Tooltip formatter={formatCurrency} />
                     <Bar dataKey="estimated" name="Estimated" fill="#003049" />
                     <Bar dataKey="actual" name="Actual" fill="#c1121f" />
