@@ -1,3 +1,4 @@
+
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Task } from "@/types";
@@ -35,7 +36,7 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
       onComplete(task.id, checked);
     } else {
       // For attendees, we show a message that they don't have permission
-      toast.error('You do not have permission to complete tasks');
+      toast.error('You need organizer privileges to complete tasks');
     }
   };
 
@@ -46,7 +47,6 @@ export default function TaskItem({ task, onComplete, onDelete, onEdit }: TaskIte
           checked={task.completed} 
           onCheckedChange={handleCheckboxChange}
           className={`${task.completed ? "text-green-500" : ""} cursor-pointer`}
-          disabled={!hasPermission('organizer')}
         />
         
         <div className={`flex-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>

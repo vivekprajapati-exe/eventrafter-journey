@@ -258,21 +258,18 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   }, [events]);
 
   const checkPermission = (action: string, requiredRole: UserRole = 'organizer'): boolean => {
-    // DEBUGGING: Add console logs to help diagnose permission issues
     console.log('Checking permission:', action);
     console.log('Current user:', user);
     console.log('Required role:', requiredRole);
     console.log('Has permission result:', hasPermission(requiredRole));
     
-    // Allow all actions during development for testing
-    // return true;
-    
-    // Skip permission check for "create events" - allow all authenticated users
+    // Special case for creating events - allow all authenticated users
     if (action === 'create events') {
       return true;
     }
     
-    return true;
+    // For all other actions, require the specified role (default: organizer)
+    return hasPermission(requiredRole);
   };
 
   const addEvent = (event: Omit<Event, "id" | "progress" | "tasks">) => {
@@ -338,7 +335,11 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addTask = (eventId: string, task: Omit<Task, "id" | "completed">) => {
-    if (!checkPermission('add tasks')) return;
+    // Only organizers or admins can add tasks
+    if (!checkPermission('add tasks')) {
+      toast.error("You need organizer privileges to add tasks");
+      return;
+    }
     
     const newTask: Task = {
       ...task,
@@ -365,7 +366,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateTask = (eventId: string, taskId: string, updatedData: Partial<Task>) => {
-    if (!checkPermission('update tasks')) return;
+    if (!checkPermission('update tasks')) {
+      toast.error("You need organizer privileges to update tasks");
+      return;
+    }
     
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
@@ -387,7 +391,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteTask = (eventId: string, taskId: string) => {
-    if (!checkPermission('delete tasks')) return;
+    if (!checkPermission('delete tasks')) {
+      toast.error("You need organizer privileges to delete tasks");
+      return;
+    }
     
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
@@ -407,7 +414,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleTaskComplete = (eventId: string, taskId: string, completed: boolean) => {
-    if (!checkPermission('complete tasks')) return;
+    if (!checkPermission('complete tasks')) {
+      toast.error("You need organizer privileges to complete tasks");
+      return;
+    }
     
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
@@ -461,7 +471,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addBudgetItem = (eventId: string, item: Omit<BudgetItem, "id">) => {
-    if (!checkPermission('add budget items')) return;
+    if (!checkPermission('add budget items')) {
+      toast.error("You need organizer privileges to add budget items");
+      return;
+    }
     
     const newItem: BudgetItem = {
       ...item,
@@ -489,7 +502,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateBudgetItem = (eventId: string, itemId: string, updatedData: Partial<BudgetItem>) => {
-    if (!checkPermission('update budget items')) return;
+    if (!checkPermission('update budget items')) {
+      toast.error("You need organizer privileges to update budget items");
+      return;
+    }
     
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
@@ -514,7 +530,10 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteBudgetItem = (eventId: string, itemId: string) => {
-    if (!checkPermission('delete budget items')) return;
+    if (!checkPermission('delete budget items')) {
+      toast.error("You need organizer privileges to delete budget items");
+      return;
+    }
     
     setEvents((prevEvents) =>
       prevEvents.map((event) => {
