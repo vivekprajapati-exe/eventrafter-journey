@@ -21,6 +21,7 @@ export interface Event {
   title: string;
   description?: string;
   location?: string;
+  placeId?: string;
   startDate: string | Date;
   endDate: string | Date;
   startTime: string;

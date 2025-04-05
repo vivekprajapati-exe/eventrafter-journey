@@ -23,6 +23,7 @@ interface FormData {
   title: string;
   description: string;
   location: string;
+  placeId?: string;
   startDate: Date;
   endDate: Date;
   startTime: string;
@@ -54,6 +55,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
         title: event.title,
         description: event.description || "",
         location: event.location || "",
+        placeId: event.placeId,
         startDate: new Date(event.startDate),
         endDate: new Date(event.endDate),
         startTime: event.startTime,
@@ -70,6 +72,14 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocationChange = (location: string, placeId?: string) => {
+    setFormData((prev) => ({ 
+      ...prev, 
+      location,
+      placeId
+    }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -131,6 +141,7 @@ export default function EventForm({ event, onSubmit, isLoading = false }: EventF
             description={formData.description}
             location={formData.location}
             onChange={handleChange}
+            onLocationChange={handleLocationChange}
           />
 
           <DateTimeSection 

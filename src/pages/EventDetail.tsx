@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEvents } from "@/context/EventContext";
@@ -10,6 +9,7 @@ import TaskForm from "@/components/TaskForm";
 import BudgetForm from "@/components/BudgetForm";
 import BudgetItem from "@/components/BudgetItem";
 import BudgetChart from "@/components/BudgetChart";
+import GoogleCalendarButton from "@/components/GoogleCalendarButton";
 import { Task, BudgetItem as BudgetItemType } from "@/types";
 import { CalendarDays, ChevronLeft, Clock, Edit, MapPin, Plus, Users, DollarSign } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -87,7 +87,14 @@ export default function EventDetail() {
       </div>;
   }
 
-  // Task handlers
+  const openGoogleMaps = () => {
+    if (event.placeId) {
+      window.open(`https://www.google.com/maps/place/?q=place_id:${event.placeId}`, '_blank');
+    } else if (event.location) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`, '_blank');
+    }
+  };
+
   const handleAddTask = (taskData: Omit<Task, "id" | "completed">) => {
     addTask(event.id, taskData);
     setIsTaskFormOpen(false);
@@ -127,7 +134,6 @@ export default function EventDetail() {
     setEvent(getEvent(event.id));
   };
 
-  // Budget handlers
   const handleAddBudgetItem = (itemData: Omit<BudgetItemType, "id">) => {
     addBudgetItem(event.id, itemData);
     setIsBudgetFormOpen(false);
@@ -162,7 +168,6 @@ export default function EventDetail() {
     }
   };
   
-  // Filtered tasks
   const pendingTasks = event.tasks.filter(task => !task.completed);
   const completedTasks = event.tasks.filter(task => task.completed);
 
@@ -190,6 +195,7 @@ export default function EventDetail() {
                 <Edit className="mr-2 h-4 w-4" /> Edit Event
               </Link>
             </Button>
+            <GoogleCalendarButton event={event} />
             {activeTab === "tasks" ? (
               <Button onClick={() => setIsTaskFormOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Add Task
@@ -227,10 +233,15 @@ export default function EventDetail() {
                   <Clock className="h-4 w-4" />
                   <span>{event.startTime} - {event.endTime}</span>
                 </div>
-                {event.location && <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {event.location && (
+                  <div 
+                    className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-primary"
+                    onClick={openGoogleMaps}
+                  >
                     <MapPin className="h-4 w-4" />
-                    <span>{event.location}</span>
-                  </div>}
+                    <span className="underline">{event.location}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Users className="h-4 w-4" />
                   <span>{event.attendees} attendees</span>

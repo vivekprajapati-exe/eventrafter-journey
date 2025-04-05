@@ -2,12 +2,14 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 
 interface EventDetailsSectionProps {
   title: string;
   description: string;
   location: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onLocationChange?: (location: string, placeId?: string) => void;
 }
 
 export default function EventDetailsSection({
@@ -15,6 +17,7 @@ export default function EventDetailsSection({
   description,
   location,
   onChange,
+  onLocationChange,
 }: EventDetailsSectionProps) {
   return (
     <>
@@ -44,13 +47,21 @@ export default function EventDetailsSection({
 
       <div className="space-y-2">
         <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          name="location"
-          value={location}
-          onChange={onChange}
-          placeholder="Enter event location"
-        />
+        {onLocationChange ? (
+          <LocationAutocomplete
+            value={location}
+            onChange={onLocationChange}
+            placeholder="Enter event location"
+          />
+        ) : (
+          <Input
+            id="location"
+            name="location"
+            value={location}
+            onChange={onChange}
+            placeholder="Enter event location"
+          />
+        )}
       </div>
     </>
   );
