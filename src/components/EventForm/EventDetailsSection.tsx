@@ -20,9 +20,9 @@ export default function EventDetailsSection({
   onLocationChange,
 }: EventDetailsSectionProps) {
   return (
-    <>
+    <div className="space-y-4 animate-fade-in">
       <div className="space-y-2">
-        <Label htmlFor="title">Event Title</Label>
+        <Label htmlFor="title" className="text-sm font-medium">Event Title</Label>
         <Input
           id="title"
           name="title"
@@ -30,11 +30,12 @@ export default function EventDetailsSection({
           onChange={onChange}
           placeholder="Enter event title"
           required
+          className="transition-all duration-300 focus:border-blue focus:ring-1 focus:ring-blue/30 hover:border-muted-foreground/50"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-sm font-medium">Description</Label>
         <Textarea
           id="description"
           name="description"
@@ -42,16 +43,18 @@ export default function EventDetailsSection({
           onChange={onChange}
           placeholder="Enter event description"
           rows={3}
+          className="transition-all duration-300 focus:border-blue focus:ring-1 focus:ring-blue/30 hover:border-muted-foreground/50 resize-y"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location" className="text-sm font-medium">Location</Label>
         {onLocationChange ? (
           <LocationAutocomplete
             value={location}
             onChange={onLocationChange}
             placeholder="Enter event location"
+            className="transition-all duration-300 focus:border-blue focus:ring-1 focus:ring-blue/30 hover:border-muted-foreground/50"
           />
         ) : (
           <Input
@@ -60,9 +63,10 @@ export default function EventDetailsSection({
             value={location}
             onChange={onChange}
             placeholder="Enter event location"
+            className="transition-all duration-300 focus:border-blue focus:ring-1 focus:ring-blue/30 hover:border-muted-foreground/50"
           />
         )}
       </div>
-    </>
+    </div>
   );
 }

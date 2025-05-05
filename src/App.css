@@ -2,13 +2,23 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+}
+
+@media (min-width: 768px) {
+  #root {
+    padding: 2rem;
+  }
 }
 
 body {
   background-color: #121212;
   color: white;
+  background-image: 
+    radial-gradient(circle at 25% 10%, rgba(102, 155, 188, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(193, 18, 31, 0.08) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 .logo {
@@ -17,9 +27,11 @@ body {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #fdf0d5aa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #669bbcaa);
 }
@@ -40,10 +52,18 @@ body {
 }
 
 .card {
-  padding: 2em;
+  padding: 1.5em;
   background-color: #1a1a1a;
   border: 1px solid #333;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(102, 155, 188, 0.5);
 }
 
 .read-the-docs {
@@ -54,8 +74,14 @@ body {
 .dark-section {
   background-color: #0a0a0a;
   border: 1px solid #333;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.dark-section:hover {
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2);
 }
 
 .action-button {
@@ -63,13 +89,16 @@ body {
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+  border-radius: 0.375rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .action-button:hover {
   background-color: #4f85a6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 .delete-button {
@@ -77,11 +106,138 @@ body {
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+  border-radius: 0.375rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .delete-button:hover {
   background-color: #a70f1a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Glow effects */
+.glow-sm {
+  box-shadow: 0 0 15px rgba(102, 155, 188, 0.15);
+}
+
+.glow-md {
+  box-shadow: 0 0 25px rgba(102, 155, 188, 0.2);
+}
+
+.glow-lg {
+  box-shadow: 0 0 35px rgba(102, 155, 188, 0.25);
+}
+
+.glow-cream {
+  box-shadow: 0 0 20px rgba(253, 240, 213, 0.2);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(193, 18, 31, 0.2);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(102, 155, 188, 0.25);
+}
+
+/* Animations */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 3s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .card {
+    padding: 1em;
+  }
+}
+
+/* Glass morphism effects */
+.glass-effect {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(102, 155, 188, 0.15);
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(102, 155, 188, 0.3);
+  box-shadow: 0 0 20px rgba(102, 155, 188, 0.15);
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #003049, #669bbc, #fdf0d5, #c1121f);
+  border-radius: 0.85rem;
+  z-index: -1;
+  animation: animate-gradient 3s linear infinite;
+}
+
+@keyframes animate-gradient {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }

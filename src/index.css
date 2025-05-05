@@ -41,6 +41,10 @@
     background-color: #121212;
     color: white;
   }
+  
+  ::selection {
+    @apply bg-blue/20 text-foreground;
+  }
 }
 
 @layer base {
@@ -50,14 +54,72 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-background/50;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-blue/50;
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .event-card {
-  @apply transition-all duration-200 hover:shadow-md bg-card border border-border hover:border-blue;
+  @apply transition-all duration-200 hover:shadow-md bg-card border border-border hover:border-blue relative overflow-hidden;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.event-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  @apply bg-blue/50;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease-out;
+}
+
+.event-card:hover::before {
+  transform: scaleX(1);
 }
 
 .task-item {
   @apply transition-all duration-150;
+  animation: slideInRight 0.3s ease-out;
 }
 
 .task-item:hover {
@@ -130,32 +192,98 @@
   border-color: #669bbc;
 }
 
-/* Custom button styles using the color palette */
+/* Button styles with hover effects */
 .btn-primary {
-  @apply bg-cream text-black hover:bg-cream/90 transition-colors;
+  @apply bg-cream text-black hover:bg-cream/90 transition-all hover:shadow-lg hover:shadow-cream/20 hover:translate-y-[-1px];
 }
 
 .btn-secondary {
-  @apply bg-navy text-white hover:bg-navy/90 transition-colors;
+  @apply bg-navy text-white hover:bg-navy/90 transition-all hover:shadow-lg hover:shadow-navy/20 hover:translate-y-[-1px];
 }
 
 .btn-accent {
-  @apply bg-blue text-white hover:bg-blue/90 transition-colors;
+  @apply bg-blue text-white hover:bg-blue/90 transition-all hover:shadow-lg hover:shadow-blue/20 hover:translate-y-[-1px];
 }
 
 .btn-danger {
-  @apply bg-red text-white hover:bg-red/90 transition-colors;
+  @apply bg-red text-white hover:bg-red/90 transition-all hover:shadow-lg hover:shadow-red/20 hover:translate-y-[-1px];
 }
 
 .btn-warning {
-  @apply bg-maroon text-white hover:bg-maroon/90 transition-colors;
+  @apply bg-maroon text-white hover:bg-maroon/90 transition-all hover:shadow-lg hover:shadow-maroon/20 hover:translate-y-[-1px];
 }
 
-/* Card and container styles */
+/* Glassmorphism card styles */
 .glass-card {
-  @apply bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg;
+  @apply bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg hover:border-white/20 transition-all;
+}
+
+.neo-glass {
+  @apply bg-black/40 backdrop-blur-lg border border-white/5 rounded-lg shadow-xl;
 }
 
 .content-container {
-  @apply bg-background/95 border border-border rounded-lg p-4 shadow-md;
+  @apply bg-background/95 border border-border rounded-lg p-4 shadow-md transition-all hover:shadow-lg hover:border-border/80;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  h1 {
+    @apply text-2xl;
+  }
+  
+  h2 {
+    @apply text-xl;
+  }
+  
+  h3 {
+    @apply text-lg;
+  }
+  
+  .container {
+    @apply px-4;
+  }
+}
+
+/* Animated elements */
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-scale {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-slide {
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.hover-scale {
+  @apply transition-transform duration-200;
+}
+
+.hover-scale:hover {
+  @apply transform scale-105;
+}
+
+/* Cards with subtle hover effects */
+.hover-card {
+  @apply transition-all duration-300;
+}
+
+.hover-card:hover {
+  @apply shadow-lg transform -translate-y-1;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue to-cream;
+}
+
+/* Custom focus styles */
+input:focus, 
+textarea:focus, 
+select:focus,
+button:focus {
+  @apply outline-none ring-2 ring-blue/30 ring-offset-2 ring-offset-background;
 }

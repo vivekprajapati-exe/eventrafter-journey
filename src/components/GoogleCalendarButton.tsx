@@ -41,14 +41,15 @@ export default function GoogleCalendarButton({ event }: GoogleCalendarButtonProp
     <Button 
       variant="outline" 
       size="sm" 
-      className="flex gap-2"
+      className="flex gap-2 group hover:border-blue/50 hover:shadow-md hover:shadow-blue/20 transition-all duration-300"
       onClick={(e) => {
         e.preventDefault();
         window.open(createGoogleCalendarUrl(), '_blank');
       }}
     >
-      <CalendarDays className="h-4 w-4" />
-      Add to Google Calendar
+      <CalendarDays className="h-4 w-4 group-hover:text-blue group-hover:animate-pulse transition-all" />
+      <span className="hidden sm:inline">Add to Google Calendar</span>
+      <span className="sm:hidden">Calendar</span>
     </Button>
   );
 }
