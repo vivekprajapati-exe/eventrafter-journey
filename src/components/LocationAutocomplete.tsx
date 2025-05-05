@@ -7,6 +7,7 @@ interface LocationAutocompleteProps {
   value: string;
   onChange: (location: string, placeId?: string) => void;
   placeholder?: string;
+  className?: string; // Added className prop
 }
 
 declare global {
@@ -19,7 +20,8 @@ declare global {
 export default function LocationAutocomplete({ 
   value, 
   onChange, 
-  placeholder = "Enter location" 
+  placeholder = "Enter location",
+  className
 }: LocationAutocompleteProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +82,7 @@ export default function LocationAutocomplete({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-10"
+        className={`pl-10 ${className}`}
       />
     </div>
   );
